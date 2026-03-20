@@ -12,6 +12,7 @@ class GitGraphView {
 	private onlyFollowFirstParent: boolean = false;
 	private avatars: AvatarImageCollection = {};
 	private currentBranches: string[] | null = null;
+	private myCommitsOnly: boolean = false;
 
 	private currentRepo!: string;
 	private currentRepoLoading: boolean = true;
@@ -50,6 +51,7 @@ class GitGraphView {
 	private readonly controlsElem: HTMLElement;
 	private readonly tableElem: HTMLElement;
 	private readonly footerElem: HTMLElement;
+	private readonly myCommitsElem: HTMLInputElement;
 	private readonly showRemoteBranchesElem: HTMLInputElement;
 	private readonly refreshBtnElem: HTMLElement;
 	private readonly scrollShadowElem: HTMLElement;
@@ -91,11 +93,20 @@ class GitGraphView {
 			this.requestLoadRepoInfoAndCommits(true, true);
 		});
 
+		this.myCommitsElem = <HTMLInputElement>document.getElementById('myCommitsCheckbox')!;
+		this.myCommitsElem.addEventListener('change', () => {
+			this.myCommitsOnly = this.myCommitsElem.checked;
+			this.maxCommits = this.config.initialLoadCommits;
+			this.saveState();
+			this.clearCommits();
+			this.requestLoadRepoInfoAndCommits(true, true);
+		});
 		this.showRemoteBranchesElem = <HTMLInputElement>document.getElementById('showRemoteBranchesCheckbox')!;
 		this.showRemoteBranchesElem.addEventListener('change', () => {
 			this.saveRepoStateValue(this.currentRepo, 'showRemoteBranchesV2', this.showRemoteBranchesElem.checked ? GG.BooleanOverride.Enabled : GG.BooleanOverride.Disabled);
 			this.refresh(true);
 		});
+		this.renderMyCommitsControl();
 
 		this.refreshBtnElem = document.getElementById('refreshBtn')!;
 		this.refreshBtnElem.addEventListener('click', () => {
@@ -121,6 +132,7 @@ class GitGraphView {
 		if (prevState && !prevState.currentRepoLoading && typeof this.gitRepos[prevState.currentRepo] !== 'undefined') {
 			this.currentRepo = prevState.currentRepo;
 			this.currentBranches = prevState.currentBranches;
+			this.myCommitsOnly = prevState.myCommitsOnly === true;
 			this.maxCommits = prevState.maxCommits;
 			this.expandedCommit = prevState.expandedCommit;
 			this.avatars = prevState.avatars;
@@ -130,6 +142,7 @@ class GitGraphView {
 			this.findWidget.restoreState(prevState.findWidget);
 			this.settingsWidget.restoreState(prevState.settingsWidget);
 			this.showRemoteBranchesElem.checked = getShowRemoteBranches(this.gitRepos[prevState.currentRepo].showRemoteBranchesV2);
+			this.renderMyCommitsControl();
 		}
 
 		let loadViewTo = initialState.loadViewTo;
@@ -214,6 +227,7 @@ class GitGraphView {
 		this.gitStashes = [];
 		this.gitTags = [];
 		this.currentBranches = null;
+		this.renderMyCommitsControl();
 		this.renderFetchButton();
 		this.closeCommitDetails(false);
 		this.settingsWidget.close();
@@ -486,14 +500,23 @@ class GitGraphView {
 	}
 
 	public processLoadConfig(msg: GG.ResponseLoadConfig) {
+		const previousAuthorFilter = this.getAuthorFilter();
 		this.currentRepoRefreshState.requestingConfig = false;
 		if (msg.config !== null && this.currentRepo === msg.repo) {
 			this.gitConfig = msg.config;
+			if (this.myCommitsOnly && this.getMyCommitsAuthorFilter() === null) {
+				this.myCommitsOnly = false;
+			}
 			this.saveState();
 
 			this.renderCdvExternalDiffBtn();
 		}
+		this.renderMyCommitsControl();
 		this.settingsWidget.refresh();
+		if (msg.config !== null && this.currentRepo === msg.repo && previousAuthorFilter !== this.getAuthorFilter()) {
+			this.clearCommits();
+			this.requestLoadRepoInfoAndCommits(true, true);
+		}
 	}
 
 	private displayLoadDataError(message: string, reason: string) {
@@ -567,6 +590,28 @@ class GitGraphView {
 		return this.gitConfig;
 	}
 
+	private getAuthorFilter() {
+		return this.myCommitsOnly
+			? this.getMyCommitsAuthorFilter()
+			: null;
+	}
+
+	private getMyCommitsAuthorFilter() {
+		if (this.gitConfig === null) {
+			return null;
+		}
+
+		const userEmail = this.gitConfig.user.email.local ?? this.gitConfig.user.email.global;
+		if (userEmail !== null && userEmail !== '') {
+			return '^.*<' + escapeStringForRegExp(userEmail) + '>$';
+		}
+
+		const userName = this.gitConfig.user.name.local ?? this.gitConfig.user.name.global;
+		return userName !== null && userName !== ''
+			? '^' + escapeStringForRegExp(userName) + ' <.*>$'
+			: null;
+	}
+
 	public getRepoState(repo: string): Readonly<GG.GitRepoState> | null {
 		return typeof this.gitRepos[repo] !== 'undefined'
 			? this.gitRepos[repo]
@@ -575,6 +620,18 @@ class GitGraphView {
 
 	public isConfigLoading(): boolean {
 		return this.currentRepoRefreshState.requestingConfig;
+	}
+
+	private renderMyCommitsControl() {
+		const myCommitsControl = <HTMLLabelElement>document.getElementById('myCommitsControl')!;
+		const authorFilter = this.getMyCommitsAuthorFilter();
+		this.myCommitsElem.checked = this.myCommitsOnly;
+		this.myCommitsElem.disabled = this.gitConfig === null || authorFilter === null;
+		myCommitsControl.title = this.gitConfig === null
+			? 'Loading Git user details...'
+			: authorFilter === null
+				? 'Configure your Git user.name or user.email to filter your commits.'
+				: 'Show only commits authored by your configured Git identity.';
 	}
 
 
@@ -609,6 +666,7 @@ class GitGraphView {
 			repo: this.currentRepo,
 			refreshId: ++this.currentRepoRefreshState.loadCommitsRefreshId,
 			branches: this.currentBranches === null || (this.currentBranches.length === 1 && this.currentBranches[0] === SHOW_ALL_BRANCHES) ? null : this.currentBranches,
+			author: this.getAuthorFilter(),
 			maxCommits: this.maxCommits,
 			showTags: getShowTags(repoState.showTags),
 			showRemoteBranches: getShowRemoteBranches(repoState.showRemoteBranchesV2),
@@ -722,6 +780,7 @@ class GitGraphView {
 			commitHead: this.commitHead,
 			avatars: this.avatars,
 			currentBranches: this.currentBranches,
+			myCommitsOnly: this.myCommitsOnly,
 			moreCommitsAvailable: this.moreCommitsAvailable,
 			maxCommits: this.maxCommits,
 			onlyFollowFirstParent: this.onlyFollowFirstParent,
@@ -3798,6 +3857,10 @@ function getOnRepoLoadShowSpecificBranches(repoValue: string[] | null) {
 	return repoValue === null
 		? initialState.config.onRepoLoad.showSpecificBranches
 		: repoValue;
+}
+
+function escapeStringForRegExp(value: string) {
+	return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 
