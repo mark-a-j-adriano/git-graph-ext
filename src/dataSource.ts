@@ -28,6 +28,7 @@ import {
 	GitSignatureStatus,
 	GitStash,
 	GitTagDetails,
+	GitWorktreeInfo,
 	MergeActionOn,
 	RebaseActionOn,
 	SquashMessageFormat,
@@ -218,6 +219,7 @@ export class DataSource extends Disposable {
   		this.getAuthors(repo).catch(
   			() => <GitAuthorData>{ authors: [], error: null }
   		),
+  		this.getWorktrees(repo).catch(() => <GitWorktreeInfo[]>[]),
   		this.getRemotes(repo),
   		showStashes ? this.getStashes(repo) : Promise.resolve([])
   	])
@@ -226,9 +228,10 @@ export class DataSource extends Disposable {
   				branches: results[0].branches,
   				branchInfos: results[0].branchInfos,
   				authors: results[1].authors,
+  				worktrees: results[2],
   				head: results[0].head,
-  				remotes: results[2],
-  				stashes: results[3],
+  				remotes: results[3],
+  				stashes: results[4],
   				error: null
   			};
   		})
@@ -237,6 +240,7 @@ export class DataSource extends Disposable {
   				branches: [],
   				branchInfos: [],
   				authors: [],
+  				worktrees: [],
   				head: null,
   				remotes: [],
   				stashes: [],
@@ -1370,6 +1374,75 @@ export class DataSource extends Disposable {
   }
 
   /**
+   * Create a worktree from an existing branch.
+   * @param repo The path of the repository.
+   * @param branchName The branch to check out in the worktree.
+   * @param worktreePath The path of the new worktree.
+   * @returns The ErrorInfo from the executed command.
+   */
+  public createWorktree(
+  	repo: string,
+  	branchName: string,
+  	worktreePath: string,
+  	startPoint: string | null
+  ) {
+  	const trimmedBranchName = branchName.trim();
+  	const trimmedPath = worktreePath.trim();
+  	const resolvedPath = path.isAbsolute(trimmedPath)
+  		? trimmedPath
+  		: path.join(repo, trimmedPath);
+  	if (trimmedBranchName === '') {
+  		return Promise.resolve(<ErrorInfo>'A branch name must be provided.');
+  	}
+  	if (trimmedPath === '') {
+  		return Promise.resolve(<ErrorInfo>'A worktree path must be provided.');
+  	}
+
+  	const args = ['worktree', 'add'];
+  	if (startPoint !== null) {
+  		args.push('-b', trimmedBranchName, resolvedPath, startPoint);
+  	} else {
+  		args.push(resolvedPath, trimmedBranchName);
+  	}
+
+  	return this.ensureDirectoryExists(path.dirname(resolvedPath)).then(
+  		() => this.runGitCommand(args, repo),
+  		(error) => <ErrorInfo>error
+  	);
+  }
+
+  /**
+   * Remove a worktree from a repository.
+   * @param repo The path of the repository.
+   * @param worktreePath The path of the worktree to remove.
+   * @param force Should force the worktree to be removed.
+   * @returns The ErrorInfo from the executed command.
+   */
+  public removeWorktree(repo: string, worktreePath: string, force: boolean) {
+  	const trimmedPath = worktreePath.trim();
+  	if (trimmedPath === '') {
+  		return Promise.resolve(<ErrorInfo>'A worktree path must be provided.');
+  	}
+
+  	const resolvedPath = path.isAbsolute(trimmedPath)
+  		? trimmedPath
+  		: path.join(repo, trimmedPath);
+  	const args = ['worktree', 'remove'];
+  	if (force) args.push('--force');
+  	args.push(resolvedPath);
+  	return this.runGitCommand(args, repo);
+  }
+
+  /**
+   * Prune stale worktree metadata from a repository.
+   * @param repo The path of the repository.
+   * @returns The ErrorInfo from the executed command.
+   */
+  public pruneWorktrees(repo: string) {
+  	return this.runGitCommand(['worktree', 'prune'], repo);
+  }
+
+  /**
    * Delete a branch in a repository.
    * @param repo The path of the repository.
    * @param branchName The name of the branch.
@@ -2488,6 +2561,136 @@ export class DataSource extends Disposable {
   }
 
   /**
+   * Get the linked worktrees of a repository.
+   * @param repo The path of the repository.
+   * @returns An array of worktree details.
+   */
+  private getWorktrees(repo: string) {
+  	const normalisedRepoPath = getPathFromStr(repo);
+  	return this.spawnGit(
+  		['worktree', 'list', '--porcelain'],
+  		repo,
+  		(stdout) => {
+  			const worktrees: GitWorktreeInfo[] = [];
+  			const lines = stdout.split(EOL_REGEX);
+  			let currentWorktree: {
+          path: string;
+          branch: string | null;
+          locked: boolean;
+          prunable: boolean;
+        } | null = null;
+
+  			const pushCurrentWorktree = () => {
+  				if (currentWorktree !== null) {
+  					worktrees.push({
+  						path: currentWorktree.path,
+  						branch: currentWorktree.branch,
+  						isCurrent: currentWorktree.path === normalisedRepoPath,
+  						locked: currentWorktree.locked,
+  						prunable: currentWorktree.prunable
+  					});
+  					currentWorktree = null;
+  				}
+  			};
+
+  			for (let i = 0; i < lines.length; i++) {
+  				const line = lines[i];
+  				if (line === '') {
+  					pushCurrentWorktree();
+  					continue;
+  				}
+
+  				const separatorIndex = line.indexOf(' ');
+  				const key =
+            separatorIndex === -1 ? line : line.substring(0, separatorIndex);
+  				const value =
+            separatorIndex === -1 ? '' : line.substring(separatorIndex + 1);
+
+  				switch (key) {
+  					case 'worktree':
+  						pushCurrentWorktree();
+  						currentWorktree = {
+  							path: getPathFromStr(value),
+  							branch: null,
+  							locked: false,
+  							prunable: false
+  						};
+  						break;
+  					case 'branch':
+  						if (currentWorktree !== null) {
+  							currentWorktree.branch = value.startsWith('refs/heads/')
+  								? value.substring('refs/heads/'.length)
+  								: value;
+  						}
+  						break;
+  					case 'locked':
+  						if (currentWorktree !== null) currentWorktree.locked = true;
+  						break;
+  					case 'prunable':
+  						if (currentWorktree !== null) currentWorktree.prunable = true;
+  						break;
+  				}
+  			}
+
+  			pushCurrentWorktree();
+  			return worktrees;
+  		}
+  	);
+  }
+
+  private ensureDirectoryExists(directoryPath: string): Promise<void> {
+  	return new Promise((resolve, reject) => {
+  		fs.stat(directoryPath, (statError, stats) => {
+  			if (!statError) {
+  				if (stats.isDirectory()) {
+  					resolve();
+  				} else {
+  					reject(
+  						'"' +
+                getPathFromStr(directoryPath) +
+                '" already exists and is not a directory.'
+  					);
+  				}
+  				return;
+  			}
+
+  			if (statError.code !== 'ENOENT') {
+  				reject(
+  					'Unable to access the worktree directory "' +
+              getPathFromStr(directoryPath) +
+              '".'
+  				);
+  				return;
+  			}
+
+  			const parentDirectory = path.dirname(directoryPath);
+  			if (parentDirectory === directoryPath) {
+  				reject(
+  					'Unable to create the worktree directory "' +
+              getPathFromStr(directoryPath) +
+              '".'
+  				);
+  				return;
+  			}
+
+  			this.ensureDirectoryExists(parentDirectory).then(() => {
+  				fs.mkdir(directoryPath, (mkdirError) => {
+  					if (!mkdirError || mkdirError.code === 'EEXIST') {
+  						resolve();
+  					} else {
+  						reject(
+  							'Unable to create the worktree directory "' +
+                  getPathFromStr(directoryPath) +
+                  '".'
+  						);
+  					}
+  				});
+  			}, reject);
+  		});
+  	});
+  }
+
+  /**
    * Get the signature of a signed tag.
    * @param repo The path of the repository.
    * @param ref The reference identifying the tag.
@@ -2960,6 +3163,7 @@ interface GitRepoInfo extends GitBranchData {
   authors: GitAuthorInfo[];
   remotes: string[];
   stashes: GitStash[];
+  worktrees: GitWorktreeInfo[];
 }
 
 interface GitRepoConfigData {

@@ -51,13 +51,13 @@ Scope:
 
 Test output:
 
-- Current packaged build: `git-graph-1.30.5.vsix`
+- Current packaged build: `git-graph-1.30.9.vsix`
 - Compile is green.
 - Full automated test suite still needs follow-up updates for changed contracts.
 
 ### Batch 2
 
-Status: Planned.
+Status: In progress.
 
 Scope:
 
@@ -73,7 +73,15 @@ Scope:
 
 - Add optional VS Code customizations when opening a newly created worktree.
 - Allow the new worktree flow to apply workspace-specific customizations during open.
+- Show the color theme selector in the create-worktree form by default until dialog inputs support conditional hide/show behavior.
 - Bump the extension version before packaging the batch.
+
+Checklist:
+
+- [x] Add Peacock preset options for new worktree windows.
+- [x] Apply selected worktree theme customizations on creation.
+- [x] Keep the theme selector visible in the create-worktree form until conditional field visibility is supported.
+- [ ] Revisit conditional theme field visibility if the dialog system gains show/hide support.
 
 ### Batch 4
 

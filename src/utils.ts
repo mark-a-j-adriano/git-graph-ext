@@ -6,11 +6,18 @@ import { getConfig } from './config';
 import { DataSource } from './dataSource';
 import { DiffSide, encodeDiffDocUri } from './diffDocProvider';
 import { ExtensionState } from './extensionState';
-import { ErrorInfo, GitFileStatus, GitRepoSet, PullRequestConfig, PullRequestProvider, RepoDropdownOrder } from './types';
+import {
+	ErrorInfo,
+	GitFileStatus,
+	GitRepoSet,
+	PullRequestConfig,
+	PullRequestProvider,
+	RepoDropdownOrder
+} from './types';
 
 export const UNCOMMITTED = '*';
-export const UNABLE_TO_FIND_GIT_MSG = 'Unable to find a Git executable. Either: Set the Visual Studio Code Setting "git.path" to the path and filename of an existing Git executable, or install Git and restart Visual Studio Code.';
-
+export const UNABLE_TO_FIND_GIT_MSG =
+  'Unable to find a Git executable. Either: Set the Visual Studio Code Setting "git.path" to the path and filename of an existing Git executable, or install Git and restart Visual Studio Code.';
 
 /* Path Manipulation */
 
@@ -49,7 +56,9 @@ export function pathWithTrailingSlash(path: string) {
  * @returns TRUE => Path is in workspace, FALSE => Path isn't in workspace.
  */
 export function isPathInWorkspace(path: string) {
-	let rootsExact = [], rootsFolder = [], workspaceFolders = vscode.workspace.workspaceFolders;
+	let rootsExact = [],
+		rootsFolder = [],
+		workspaceFolders = vscode.workspace.workspaceFolders;
 	if (typeof workspaceFolders !== 'undefined') {
 		for (let i = 0; i < workspaceFolders.length; i++) {
 			let tmpPath = getPathFromUri(workspaceFolders[i].uri);
@@ -57,7 +66,10 @@ export function isPathInWorkspace(path: string) {
 			rootsFolder.push(pathWithTrailingSlash(tmpPath));
 		}
 	}
-	return rootsExact.indexOf(path) > -1 || rootsFolder.findIndex(x => path.startsWith(x)) > -1;
+	return (
+		rootsExact.indexOf(path) > -1 ||
+    rootsFolder.findIndex((x) => path.startsWith(x)) > -1
+	);
 }
 
 /**
@@ -68,7 +80,11 @@ export function isPathInWorkspace(path: string) {
  */
 export function realpath(path: string, native: boolean = false) {
 	return new Promise<string>((resolve) => {
-		(native ? fs.realpath.native : fs.realpath)(path, (err, resolvedPath) => resolve(err !== null ? path : getPathFromUri(vscode.Uri.file(resolvedPath))));
+		(native ? fs.realpath.native : fs.realpath)(path, (err, resolvedPath) =>
+			resolve(
+				err !== null ? path : getPathFromUri(vscode.Uri.file(resolvedPath))
+			)
+		);
 	});
 }
 
@@ -91,7 +107,8 @@ export async function resolveToSymbolicPath(path: string) {
 				let symPath = rootSymPath;
 				let first = symPath.indexOf('/');
 				while (true) {
-					if (path === symPath || path === await realpath(symPath)) return symPath;
+					if (path === symPath || path === (await realpath(symPath)))
+						return symPath;
 					let next = symPath.lastIndexOf('/');
 					if (first !== next && next > -1) {
 						symPath = symPath.substring(0, next);
@@ -115,7 +132,6 @@ export function doesFileExist(path: string) {
 		fs.access(path, fs.constants.R_OK, (err) => resolve(err === null));
 	});
 }
-
 
 /* General Methods */
 
@@ -144,7 +160,8 @@ export function abbrevText(text: string, toChars: number) {
  * @returns The relative time difference (e.g. 12 minutes ago).
  */
 export function getRelativeTimeDiff(unixTimestamp: number) {
-	let diff = Math.round((new Date()).getTime() / 1000) - unixTimestamp, unit;
+	let diff = Math.round(new Date().getTime() / 1000) - unixTimestamp,
+		unit;
 	if (diff < 60) {
 		unit = 'second';
 	} else if (diff < 3600) {
@@ -177,17 +194,20 @@ export function getRelativeTimeDiff(unixTimestamp: number) {
  */
 export function getExtensionVersion(extensionContext: vscode.ExtensionContext) {
 	return new Promise<string>((resolve, reject) => {
-		fs.readFile(path.join(extensionContext.extensionPath, 'package.json'), (err, data) => {
-			if (err) {
-				reject();
-			} else {
-				try {
-					resolve(JSON.parse(data.toString()).version);
-				} catch (_) {
+		fs.readFile(
+			path.join(extensionContext.extensionPath, 'package.json'),
+			(err, data) => {
+				if (err) {
 					reject();
+				} else {
+					try {
+						resolve(JSON.parse(data.toString()).version);
+					} catch (_) {
+						reject();
+					}
 				}
 			}
-		});
+		);
 	});
 }
 
@@ -197,7 +217,8 @@ export function getExtensionVersion(extensionContext: vscode.ExtensionContext) {
  */
 export function getNonce() {
 	let text = '';
-	const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+	const possible =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 	for (let i = 0; i < 32; i++) {
 		text += possible.charAt(Math.floor(Math.random() * possible.length));
 	}
@@ -225,26 +246,37 @@ export function getRepoName(path: string) {
  * @param order The order to sort the repositories.
  * @returns An array of ordered repository paths.
  */
-export function getSortedRepositoryPaths(repos: GitRepoSet, order: RepoDropdownOrder): ReadonlyArray<string> {
+export function getSortedRepositoryPaths(
+	repos: GitRepoSet,
+	order: RepoDropdownOrder
+): ReadonlyArray<string> {
 	const repoPaths = Object.keys(repos);
 	if (order === RepoDropdownOrder.WorkspaceFullPath) {
-		return repoPaths.sort((a, b) => repos[a].workspaceFolderIndex === repos[b].workspaceFolderIndex
-			? a.localeCompare(b)
-			: repos[a].workspaceFolderIndex === null
-				? 1
-				: repos[b].workspaceFolderIndex === null
-					? -1
-					: repos[a].workspaceFolderIndex! - repos[b].workspaceFolderIndex!
+		return repoPaths.sort((a, b) =>
+			repos[a].workspaceFolderIndex === repos[b].workspaceFolderIndex
+				? a.localeCompare(b)
+				: repos[a].workspaceFolderIndex === null
+					? 1
+					: repos[b].workspaceFolderIndex === null
+						? -1
+						: repos[a].workspaceFolderIndex! - repos[b].workspaceFolderIndex!
 		);
 	} else if (order === RepoDropdownOrder.FullPath) {
 		return repoPaths.sort((a, b) => a.localeCompare(b));
 	} else {
-		return repoPaths.map((path) => ({ name: repos[path].name || getRepoName(path), path: path }))
-			.sort((a, b) => a.name !== b.name ? a.name.localeCompare(b.name) : a.path.localeCompare(b.path))
+		return repoPaths
+			.map((path) => ({
+				name: repos[path].name || getRepoName(path),
+				path: path
+			}))
+			.sort((a, b) =>
+				a.name !== b.name
+					? a.name.localeCompare(b.name)
+					: a.path.localeCompare(b.path)
+			)
 			.map((x) => x.path);
 	}
 }
-
 
 /* Visual Studio Code Command Wrappers */
 
@@ -255,28 +287,39 @@ export function getSortedRepositoryPaths(repos: GitRepoSet, order: RepoDropdownO
  * @param dataSource The DataSource instance that can be used to create the archive.
  * @returns A promise resolving to the ErrorInfo of the executed command.
  */
-export function archive(repo: string, ref: string, dataSource: DataSource): Thenable<ErrorInfo> {
-	return vscode.window.showSaveDialog({
-		defaultUri: vscode.Uri.file(repo),
-		saveLabel: 'Create Archive',
-		filters: { 'TAR Archive': ['tar'], 'ZIP Archive': ['zip'] }
-	}).then(
-		(uri) => {
-			if (uri) {
-				const extension = uri.fsPath.substring(uri.fsPath.lastIndexOf('.') + 1).toLowerCase();
-				if (extension === 'tar' || extension === 'zip') {
-					return dataSource.archive(repo, ref, uri.fsPath, extension);
+export function archive(
+	repo: string,
+	ref: string,
+	dataSource: DataSource
+): Thenable<ErrorInfo> {
+	return vscode.window
+		.showSaveDialog({
+			defaultUri: vscode.Uri.file(repo),
+			saveLabel: 'Create Archive',
+			filters: { 'TAR Archive': ['tar'], 'ZIP Archive': ['zip'] }
+		})
+		.then(
+			(uri) => {
+				if (uri) {
+					const extension = uri.fsPath
+						.substring(uri.fsPath.lastIndexOf('.') + 1)
+						.toLowerCase();
+					if (extension === 'tar' || extension === 'zip') {
+						return dataSource.archive(repo, ref, uri.fsPath, extension);
+					} else {
+						return (
+							'Invalid file extension "*.' +
+              extension +
+              '". The archive file must have a *.tar or *.zip extension.'
+						);
+					}
 				} else {
-					return 'Invalid file extension "*.' + extension + '". The archive file must have a *.tar or *.zip extension.';
+					return 'No file name was provided for the archive.';
 				}
-			} else {
-				return 'No file name was provided for the archive.';
-			}
-		},
-		() => 'Visual Studio Code was unable to display the save dialog.'
-	);
+			},
+			() => 'Visual Studio Code was unable to display the save dialog.'
+		);
 }
-
 
 /**
  * Copy the path of a file in a repository to the clipboard.
@@ -285,7 +328,11 @@ export function archive(repo: string, ref: string, dataSource: DataSource): Then
  * @param absolute TRUE => Absolute path, FALSE => Relative path.
  * @returns A promise resolving to the ErrorInfo of the executed command.
  */
-export function copyFilePathToClipboard(repo: string, filePath: string, absolute: boolean) {
+export function copyFilePathToClipboard(
+	repo: string,
+	filePath: string,
+	absolute: boolean
+) {
 	return copyToClipboard(absolute ? path.join(repo, filePath) : filePath);
 }
 
@@ -309,11 +356,17 @@ export function copyToClipboard(text: string): Thenable<ErrorInfo> {
  * @param sourceBranch The source branch the Pull Request should be created from.
  * @returns A promise resolving to the ErrorInfo of the executed command.
  */
-export function createPullRequest(config: PullRequestConfig, sourceOwner: string, sourceRepo: string, sourceBranch: string) {
+export function createPullRequest(
+	config: PullRequestConfig,
+	sourceOwner: string,
+	sourceRepo: string,
+	sourceBranch: string
+) {
 	let templateUrl;
 	switch (config.provider) {
 		case PullRequestProvider.Bitbucket:
-			templateUrl = '$1/$2/$3/pull-requests/new?source=$2/$3::$4&dest=$5/$6::$8';
+			templateUrl =
+        '$1/$2/$3/pull-requests/new?source=$2/$3::$4&dest=$5/$6::$8';
 			break;
 		case PullRequestProvider.Custom:
 			templateUrl = config.custom.templateUrl;
@@ -322,18 +375,29 @@ export function createPullRequest(config: PullRequestConfig, sourceOwner: string
 			templateUrl = '$1/$5/$6/compare/$8...$2:$4';
 			break;
 		case PullRequestProvider.GitLab:
-			templateUrl = '$1/$2/$3/-/merge_requests/new?merge_request[source_branch]=$4&merge_request[target_branch]=$8' +
-				(config.destProjectId !== '' ? '&merge_request[target_project_id]=$7' : '');
+			templateUrl =
+        '$1/$2/$3/-/merge_requests/new?merge_request[source_branch]=$4&merge_request[target_branch]=$8' +
+        (config.destProjectId !== ''
+        	? '&merge_request[target_project_id]=$7'
+        	: '');
 			break;
 	}
 
 	const urlFieldValues = [
 		config.hostRootUrl,
-		sourceOwner, sourceRepo, sourceBranch,
-		config.destOwner, config.destRepo, config.destProjectId, config.destBranch
+		sourceOwner,
+		sourceRepo,
+		sourceBranch,
+		config.destOwner,
+		config.destRepo,
+		config.destProjectId,
+		config.destBranch
 	];
 
-	const url = templateUrl.replace(/\$([1-8])/g, (_, index) => urlFieldValues[parseInt(index) - 1]);
+	const url = templateUrl.replace(
+		/\$([1-8])/g,
+		(_, index) => urlFieldValues[parseInt(index) - 1]
+	);
 
 	return openExternalUrl(url, 'Pull Request URL');
 }
@@ -343,10 +407,13 @@ export function createPullRequest(config: PullRequestConfig, sourceOwner: string
  * @returns A promise resolving to the ErrorInfo of the executed command.
  */
 export function openExtensionSettings(): Thenable<ErrorInfo> {
-	return vscode.commands.executeCommand('workbench.action.openSettings', '@ext:mhutchie.git-graph').then(
-		() => null,
-		() => 'Visual Studio Code was unable to open the Git Graph Extension Settings.'
-	);
+	return vscode.commands
+		.executeCommand('workbench.action.openSettings', '@ext:mhutchie.git-graph')
+		.then(
+			() => null,
+			() =>
+				'Visual Studio Code was unable to open the Git Graph Extension Settings.'
+		);
 }
 
 /**
@@ -355,13 +422,16 @@ export function openExtensionSettings(): Thenable<ErrorInfo> {
  * @param type The type of URL being opened (defaults to "External URL").
  * @returns A promise resolving to the ErrorInfo of the executed command.
  */
-export function openExternalUrl(url: string, type: string = 'External URL'): Thenable<ErrorInfo> {
-	const getErrorMessage = () => 'Visual Studio Code was unable to open the ' + type + ': ' + url;
+export function openExternalUrl(
+	url: string,
+	type: string = 'External URL'
+): Thenable<ErrorInfo> {
+	const getErrorMessage = () =>
+		'Visual Studio Code was unable to open the ' + type + ': ' + url;
 	try {
-		return vscode.env.openExternal(vscode.Uri.parse(url)).then(
-			(success) => success ? null : getErrorMessage(),
-			getErrorMessage
-		);
+		return vscode.env
+			.openExternal(vscode.Uri.parse(url))
+			.then((success) => (success ? null : getErrorMessage()), getErrorMessage);
 	} catch (_) {
 		return Promise.resolve(getErrorMessage());
 	}
@@ -376,12 +446,22 @@ export function openExternalUrl(url: string, type: string = 'External URL'): The
  * @param viewColumn An optional ViewColumn that the file should be opened in.
  * @returns A promise resolving to the ErrorInfo of the executed command.
  */
-export async function openFile(repo: string, filePath: string, hash: string | null = null, dataSource: DataSource | null = null, viewColumn: vscode.ViewColumn | null = null) {
+export async function openFile(
+	repo: string,
+	filePath: string,
+	hash: string | null = null,
+	dataSource: DataSource | null = null,
+	viewColumn: vscode.ViewColumn | null = null
+) {
 	let newFilePath = filePath;
 	let newAbsoluteFilePath = path.join(repo, newFilePath);
 	let fileExists = await doesFileExist(newAbsoluteFilePath);
 	if (!fileExists && hash !== null && dataSource !== null) {
-		const renamedFilePath = await dataSource.getNewPathOfRenamedFile(repo, hash, filePath);
+		const renamedFilePath = await dataSource.getNewPathOfRenamedFile(
+			repo,
+			hash,
+			filePath
+		);
 		if (renamedFilePath !== null) {
 			const renamedAbsoluteFilePath = path.join(repo, renamedFilePath);
 			if (await doesFileExist(renamedAbsoluteFilePath)) {
@@ -393,15 +473,20 @@ export async function openFile(repo: string, filePath: string, hash: string | nu
 	}
 
 	if (fileExists) {
-		return vscode.commands.executeCommand('vscode.open', vscode.Uri.file(newAbsoluteFilePath), {
-			preview: true,
-			viewColumn: viewColumn === null ? getConfig().openNewTabEditorGroup : viewColumn
-		}).then(
-			() => null,
-			() => 'Visual Studio Code was unable to open ' + newFilePath + '.'
-		);
+		return vscode.commands
+			.executeCommand('vscode.open', vscode.Uri.file(newAbsoluteFilePath), {
+				preview: true,
+				viewColumn:
+          viewColumn === null ? getConfig().openNewTabEditorGroup : viewColumn
+			})
+			.then(
+				() => null,
+				() => 'Visual Studio Code was unable to open ' + newFilePath + '.'
+			);
 	} else {
-		return 'The file ' + newFilePath + ' doesn\'t currently exist in this repository.';
+		return (
+			'The file ' + newFilePath + ' doesn\'t currently exist in this repository.'
+		);
 	}
 }
 
@@ -415,24 +500,59 @@ export async function openFile(repo: string, filePath: string, hash: string | nu
  * @param type The Git file status of the change.
  * @returns A promise resolving to the ErrorInfo of the executed command.
  */
-export function viewDiff(repo: string, fromHash: string, toHash: string, oldFilePath: string, newFilePath: string, type: GitFileStatus) {
+export function viewDiff(
+	repo: string,
+	fromHash: string,
+	toHash: string,
+	oldFilePath: string,
+	newFilePath: string,
+	type: GitFileStatus
+) {
 	if (type !== GitFileStatus.Untracked) {
-		let abbrevFromHash = abbrevCommit(fromHash), abbrevToHash = toHash !== UNCOMMITTED ? abbrevCommit(toHash) : 'Present', pathComponents = newFilePath.split('/');
-		let desc = fromHash === toHash
-			? fromHash === UNCOMMITTED
-				? 'Uncommitted'
-				: (type === GitFileStatus.Added ? 'Added in ' + abbrevToHash : type === GitFileStatus.Deleted ? 'Deleted in ' + abbrevToHash : abbrevFromHash + '^ ↔ ' + abbrevToHash)
-			: (type === GitFileStatus.Added ? 'Added between ' + abbrevFromHash + ' & ' + abbrevToHash : type === GitFileStatus.Deleted ? 'Deleted between ' + abbrevFromHash + ' & ' + abbrevToHash : abbrevFromHash + ' ↔ ' + abbrevToHash);
+		let abbrevFromHash = abbrevCommit(fromHash),
+			abbrevToHash = toHash !== UNCOMMITTED ? abbrevCommit(toHash) : 'Present',
+			pathComponents = newFilePath.split('/');
+		let desc =
+      fromHash === toHash
+      	? fromHash === UNCOMMITTED
+      		? 'Uncommitted'
+      		: type === GitFileStatus.Added
+      			? 'Added in ' + abbrevToHash
+      			: type === GitFileStatus.Deleted
+      				? 'Deleted in ' + abbrevToHash
+      				: abbrevFromHash + '^ ↔ ' + abbrevToHash
+      	: type === GitFileStatus.Added
+      		? 'Added between ' + abbrevFromHash + ' & ' + abbrevToHash
+      		: type === GitFileStatus.Deleted
+      			? 'Deleted between ' + abbrevFromHash + ' & ' + abbrevToHash
+      			: abbrevFromHash + ' ↔ ' + abbrevToHash;
 		let title = pathComponents[pathComponents.length - 1] + ' (' + desc + ')';
 		if (fromHash === UNCOMMITTED) fromHash = 'HEAD';
 
-		return vscode.commands.executeCommand('vscode.diff', encodeDiffDocUri(repo, oldFilePath, fromHash === toHash ? fromHash + '^' : fromHash, type, DiffSide.Old), encodeDiffDocUri(repo, newFilePath, toHash, type, DiffSide.New), title, {
-			preview: true,
-			viewColumn: getConfig().openNewTabEditorGroup
-		}).then(
-			() => null,
-			() => 'Visual Studio Code was unable to load the diff editor for ' + newFilePath + '.'
-		);
+		return vscode.commands
+			.executeCommand(
+				'vscode.diff',
+				encodeDiffDocUri(
+					repo,
+					oldFilePath,
+					fromHash === toHash ? fromHash + '^' : fromHash,
+					type,
+					DiffSide.Old
+				),
+				encodeDiffDocUri(repo, newFilePath, toHash, type, DiffSide.New),
+				title,
+				{
+					preview: true,
+					viewColumn: getConfig().openNewTabEditorGroup
+				}
+			)
+			.then(
+				() => null,
+				() =>
+					'Visual Studio Code was unable to load the diff editor for ' +
+          newFilePath +
+          '.'
+			);
 	} else {
 		return openFile(repo, newFilePath);
 	}
@@ -446,12 +566,24 @@ export function viewDiff(repo: string, fromHash: string, toHash: string, oldFile
  * @param dataSource A DataSource instance, that's used to check if the file has been renamed.
  * @returns A promise resolving to the ErrorInfo of the executed command.
  */
-export async function viewDiffWithWorkingFile(repo: string, hash: string, filePath: string, dataSource: DataSource) {
+export async function viewDiffWithWorkingFile(
+	repo: string,
+	hash: string,
+	filePath: string,
+	dataSource: DataSource
+) {
 	let newFilePath = filePath;
 	let fileExists = await doesFileExist(path.join(repo, newFilePath));
 	if (!fileExists) {
-		const renamedFilePath = await dataSource.getNewPathOfRenamedFile(repo, hash, filePath);
-		if (renamedFilePath !== null && await doesFileExist(path.join(repo, renamedFilePath))) {
+		const renamedFilePath = await dataSource.getNewPathOfRenamedFile(
+			repo,
+			hash,
+			filePath
+		);
+		if (
+			renamedFilePath !== null &&
+      (await doesFileExist(path.join(repo, renamedFilePath)))
+		) {
 			newFilePath = renamedFilePath;
 			fileExists = true;
 		}
@@ -473,17 +605,39 @@ export async function viewDiffWithWorkingFile(repo: string, hash: string, filePa
  * @param filePath The relative path of the file within the repository.
  * @returns A promise resolving to the ErrorInfo of the executed command.
  */
-export function viewFileAtRevision(repo: string, hash: string, filePath: string) {
+export function viewFileAtRevision(
+	repo: string,
+	hash: string,
+	filePath: string
+) {
 	const pathComponents = filePath.split('/');
-	const title = abbrevCommit(hash) + ': ' + pathComponents[pathComponents.length - 1];
+	const title =
+    abbrevCommit(hash) + ': ' + pathComponents[pathComponents.length - 1];
 
-	return vscode.commands.executeCommand('vscode.open', encodeDiffDocUri(repo, filePath, hash, GitFileStatus.Modified, DiffSide.New).with({ path: title }), {
-		preview: true,
-		viewColumn: getConfig().openNewTabEditorGroup
-	}).then(
-		() => null,
-		() => 'Visual Studio Code was unable to open ' + filePath + ' at commit ' + abbrevCommit(hash) + '.'
-	);
+	return vscode.commands
+		.executeCommand(
+			'vscode.open',
+			encodeDiffDocUri(
+				repo,
+				filePath,
+				hash,
+				GitFileStatus.Modified,
+				DiffSide.New
+			).with({ path: title }),
+			{
+				preview: true,
+				viewColumn: getConfig().openNewTabEditorGroup
+			}
+		)
+		.then(
+			() => null,
+			() =>
+				'Visual Studio Code was unable to open ' +
+        filePath +
+        ' at commit ' +
+        abbrevCommit(hash) +
+        '.'
+		);
 }
 
 /**
@@ -504,15 +658,21 @@ export function viewScm(): Thenable<ErrorInfo> {
  * @param command The command to run.
  * @param name The name for the terminal.
  */
-export function openGitTerminal(cwd: string, gitPath: string, command: string | null, name: string) {
-	let p = process.env['PATH'] || '', sep = isWindows() ? ';' : ':';
+export function openGitTerminal(
+	cwd: string,
+	gitPath: string,
+	command: string | null,
+	name: string
+) {
+	let p = process.env['PATH'] || '',
+		sep = isWindows() ? ';' : ':';
 	if (p !== '' && !p.endsWith(sep)) p += sep;
 	p += path.dirname(gitPath);
 
 	const options: vscode.TerminalOptions = {
 		cwd: cwd,
 		name: 'Git Graph: ' + name,
-		env: { 'PATH': p }
+		env: { PATH: p }
 	};
 	const shell = getConfig().integratedTerminalShell;
 	if (shell !== '') options.shellPath = shell;
@@ -525,13 +685,195 @@ export function openGitTerminal(cwd: string, gitPath: string, command: string | 
 }
 
 /**
+ * Open a folder in a new Visual Studio Code window.
+ * @param folderPath The folder to open.
+ * @returns A promise resolving to the ErrorInfo of the executed command.
+ */
+export function openFolderInNewWindow(folderPath: string): Thenable<ErrorInfo> {
+	return vscode.commands
+		.executeCommand('vscode.openFolder', vscode.Uri.file(folderPath), true)
+		.then(
+			() => null,
+			() =>
+				'Visual Studio Code was unable to open the worktree in a new window.'
+		);
+}
+
+/**
+ * Reveal a folder in the operating system's file explorer.
+ * @param folderPath The folder to reveal.
+ * @returns A promise resolving to the ErrorInfo of the executed command.
+ */
+export function revealInFileExplorer(folderPath: string): Thenable<ErrorInfo> {
+	return vscode.commands
+		.executeCommand('revealFileInOS', vscode.Uri.file(folderPath))
+		.then(
+			() => null,
+			() =>
+				'Visual Studio Code was unable to reveal the worktree in the file explorer.'
+		);
+}
+
+/**
+ * Apply a workspace color theme to a folder.
+ * @param folderPath The workspace folder path.
+ * @param colorTheme The exact VS Code color theme name to apply.
+ * @returns A promise resolving to the ErrorInfo of the file system operations.
+ */
+
+const WORKTREE_COLOR_THEME_PRESETS: {
+  [preset: string]: { [colorKey: string]: string };
+} = {
+	'peacock-blue': {
+		'activityBar.background': '#1f5f8b',
+		'activityBar.foreground': '#f7fbff',
+		'statusBar.background': '#174869',
+		'statusBar.foreground': '#f7fbff',
+		'titleBar.activeBackground': '#1f5f8b',
+		'titleBar.activeForeground': '#f7fbff',
+		'titleBar.inactiveBackground': '#1f5f8bcc',
+		'titleBar.inactiveForeground': '#f7fbffcc'
+	},
+	'peacock-green': {
+		'activityBar.background': '#2e6b3a',
+		'activityBar.foreground': '#f5fff7',
+		'statusBar.background': '#1f4a29',
+		'statusBar.foreground': '#f5fff7',
+		'titleBar.activeBackground': '#2e6b3a',
+		'titleBar.activeForeground': '#f5fff7',
+		'titleBar.inactiveBackground': '#2e6b3acc',
+		'titleBar.inactiveForeground': '#f5fff7cc'
+	},
+	'peacock-purple': {
+		'activityBar.background': '#6d3a7f',
+		'activityBar.foreground': '#fff7ff',
+		'statusBar.background': '#4f2a5d',
+		'statusBar.foreground': '#fff7ff',
+		'titleBar.activeBackground': '#6d3a7f',
+		'titleBar.activeForeground': '#fff7ff',
+		'titleBar.inactiveBackground': '#6d3a7fcc',
+		'titleBar.inactiveForeground': '#fff7ffcc'
+	},
+	'peacock-orange': {
+		'activityBar.background': '#a34f1f',
+		'activityBar.foreground': '#fff8f2',
+		'statusBar.background': '#7c3b16',
+		'statusBar.foreground': '#fff8f2',
+		'titleBar.activeBackground': '#a34f1f',
+		'titleBar.activeForeground': '#fff8f2',
+		'titleBar.inactiveBackground': '#a34f1fcc',
+		'titleBar.inactiveForeground': '#fff8f2cc'
+	},
+	'peacock-teal': {
+		'activityBar.background': '#146c6a',
+		'activityBar.foreground': '#f2fffe',
+		'statusBar.background': '#0f4f4d',
+		'statusBar.foreground': '#f2fffe',
+		'titleBar.activeBackground': '#146c6a',
+		'titleBar.activeForeground': '#f2fffe',
+		'titleBar.inactiveBackground': '#146c6acc',
+		'titleBar.inactiveForeground': '#f2fffecc'
+	}
+};
+
+export function applyWorktreeColorTheme(
+	folderPath: string,
+	colorTheme: string
+): Promise<ErrorInfo> {
+	const trimmedTheme = colorTheme.trim();
+	const presetColors = WORKTREE_COLOR_THEME_PRESETS[trimmedTheme];
+	if (trimmedTheme === '') return Promise.resolve(null);
+
+	return new Promise((resolve) => {
+		const vscodePath = path.join(folderPath, '.vscode');
+		fs.mkdir(vscodePath, (mkdirErr) => {
+			if (mkdirErr && mkdirErr.code !== 'EEXIST') {
+				resolve(
+					'Unable to create the workspace settings directory for the worktree.'
+				);
+				return;
+			}
+
+			const settingsPath = path.join(vscodePath, 'settings.json');
+			fs.readFile(settingsPath, 'utf8', (readErr, contents) => {
+				let settings: { [key: string]: unknown } = {};
+				if (!readErr) {
+					try {
+						const parsedContents = JSON.parse(contents);
+						if (
+							parsedContents === null ||
+              typeof parsedContents !== 'object' ||
+              Array.isArray(parsedContents)
+						) {
+							resolve(
+								'Unable to apply the worktree color theme because the existing workspace settings are not a JSON object.'
+							);
+							return;
+						}
+						settings = <{ [key: string]: unknown }>parsedContents;
+					} catch (_) {
+						resolve(
+							'Unable to apply the worktree color theme because the existing workspace settings are not valid JSON.'
+						);
+						return;
+					}
+				} else if (readErr.code !== 'ENOENT') {
+					resolve(
+						'Unable to read the existing workspace settings for the worktree.'
+					);
+					return;
+				}
+
+				if (typeof presetColors !== 'undefined') {
+					const currentColorCustomizations =
+            settings['workbench.colorCustomizations'];
+					if (
+						typeof currentColorCustomizations !== 'undefined' &&
+            (currentColorCustomizations === null ||
+              typeof currentColorCustomizations !== 'object' ||
+              Array.isArray(currentColorCustomizations))
+					) {
+						resolve(
+							'Unable to apply the worktree color preset because the existing workbench.colorCustomizations setting is not a JSON object.'
+						);
+						return;
+					}
+					settings['workbench.colorCustomizations'] = {
+						...(typeof currentColorCustomizations === 'undefined'
+							? {}
+							: <{ [key: string]: unknown }>currentColorCustomizations),
+						...presetColors
+					};
+				} else {
+					settings['workbench.colorTheme'] = trimmedTheme;
+				}
+				fs.writeFile(
+					settingsPath,
+					JSON.stringify(settings, null, 2),
+					(writeErr) => {
+						resolve(
+							writeErr
+								? 'Unable to write the workspace settings for the worktree.'
+								: null
+						);
+					}
+				);
+			});
+		});
+	});
+}
+
+/**
  * Check whether Git Graph is running on a Windows-based platform.
  * @returns TRUE => Windows-based platform, FALSE => Not a Windows-based platform.
  */
 function isWindows() {
-	return process.platform === 'win32' || process.env.OSTYPE === 'cygwin' || process.env.OSTYPE === 'msys';
+	return (
+		process.platform === 'win32' ||
+    process.env.OSTYPE === 'cygwin' ||
+    process.env.OSTYPE === 'msys'
+	);
 }
-
 
 /* Visual Studio Code API Wrappers */
 
@@ -540,7 +882,10 @@ function isWindows() {
  * @param message The message to show.
  */
 export function showInformationMessage(message: string) {
-	return vscode.window.showInformationMessage(message).then(() => { }, () => { });
+	return vscode.window.showInformationMessage(message).then(
+		() => {},
+		() => {}
+	);
 }
 
 /**
@@ -548,9 +893,11 @@ export function showInformationMessage(message: string) {
  * @param message The message to show.
  */
 export function showErrorMessage(message: string) {
-	return vscode.window.showErrorMessage(message).then(() => { }, () => { });
+	return vscode.window.showErrorMessage(message).then(
+		() => {},
+		() => {}
+	);
 }
-
 
 /* Promise Methods */
 
@@ -561,28 +908,39 @@ export function showErrorMessage(message: string) {
  * @param createPromise A function that creates a promise from an element of `data`.
  * @returns A result array evaluated by mapping promises generated from `data`.
  */
-export function evalPromises<X, Y>(data: X[], maxParallel: number, createPromise: (val: X) => Promise<Y>) {
+export function evalPromises<X, Y>(
+	data: X[],
+	maxParallel: number,
+	createPromise: (val: X) => Promise<Y>
+) {
 	return new Promise<Y[]>((resolve, reject) => {
 		if (data.length === 1) {
-			createPromise(data[0]).then(v => resolve([v])).catch(() => reject());
+			createPromise(data[0])
+				.then((v) => resolve([v]))
+				.catch(() => reject());
 		} else if (data.length === 0) {
 			resolve([]);
 		} else {
-			let results: Y[] = new Array(data.length), nextPromise = 0, rejected = false, completed = 0;
+			let results: Y[] = new Array(data.length),
+				nextPromise = 0,
+				rejected = false,
+				completed = 0;
 			function startNext() {
 				let cur = nextPromise;
 				nextPromise++;
-				createPromise(data[cur]).then(result => {
-					if (!rejected) {
-						results[cur] = result;
-						completed++;
-						if (nextPromise < data.length) startNext();
-						else if (completed === data.length) resolve(results);
-					}
-				}).catch(() => {
-					reject();
-					rejected = true;
-				});
+				createPromise(data[cur])
+					.then((result) => {
+						if (!rejected) {
+							results[cur] = result;
+							completed++;
+							if (nextPromise < data.length) startNext();
+							else if (completed === data.length) resolve(results);
+						}
+					})
+					.catch(() => {
+						reject();
+						rejected = true;
+					});
 			}
 			for (let i = 0; i < maxParallel && i < data.length; i++) startNext();
 		}
@@ -596,7 +954,7 @@ export function evalPromises<X, Y>(data: X[], maxParallel: number, createPromise
  */
 export function resolveSpawnOutput(cmd: cp.ChildProcess) {
 	return Promise.all([
-		new Promise<{ code: number, error: Error | null }>((resolve) => {
+		new Promise<{ code: number; error: Error | null }>((resolve) => {
 			// status promise
 			let resolved = false;
 			cmd.on('error', (error) => {
@@ -613,18 +971,21 @@ export function resolveSpawnOutput(cmd: cp.ChildProcess) {
 		new Promise<Buffer>((resolve) => {
 			// stdout promise
 			let buffers: Buffer[] = [];
-			cmd.stdout.on('data', (b: Buffer) => { buffers.push(b); });
+			cmd.stdout.on('data', (b: Buffer) => {
+				buffers.push(b);
+			});
 			cmd.stdout.on('close', () => resolve(Buffer.concat(buffers)));
 		}),
 		new Promise<string>((resolve) => {
 			// stderr promise
 			let stderr = '';
-			cmd.stderr.on('data', (d) => { stderr += d; });
+			cmd.stderr.on('data', (d) => {
+				stderr += d;
+			});
 			cmd.stderr.on('close', () => resolve(stderr));
 		})
 	]);
 }
-
 
 /* Find Git Executable */
 
@@ -635,8 +996,8 @@ export function resolveSpawnOutput(cmd: cp.ChildProcess) {
 // https://github.com/microsoft/vscode/blob/473af338e1bd9ad4d9853933da1cd9d5d9e07dc9/extensions/git/src/git.ts#L44-L135
 
 export interface GitExecutable {
-	readonly path: string;
-	readonly version: string;
+  readonly path: string;
+  readonly version: string;
 }
 
 /**
@@ -649,14 +1010,14 @@ export async function findGit(extensionState: ExtensionState) {
 	if (lastKnownPath !== null) {
 		try {
 			return await getGitExecutable(lastKnownPath);
-		} catch (_) { }
+		} catch (_) {}
 	}
 
 	const configGitPaths = getConfig().gitPaths;
 	if (configGitPaths.length > 0) {
 		try {
 			return await getGitExecutableFromPaths(configGitPaths);
-		} catch (_) { }
+		} catch (_) {}
 	}
 
 	switch (process.platform) {
@@ -680,7 +1041,10 @@ function findGitOnDarwin() {
 
 			const path = stdout.trim();
 			if (path !== '/usr/bin/git') {
-				getGitExecutable(path).then((exec) => resolve(exec), () => reject());
+				getGitExecutable(path).then(
+					(exec) => resolve(exec),
+					() => reject()
+				);
 			} else {
 				// must check if XCode is installed
 				cp.exec('xcode-select -p', (err: any) => {
@@ -688,7 +1052,10 @@ function findGitOnDarwin() {
 						// git is not installed, and launching /usr/bin/git will prompt the user to install it
 						reject();
 					} else {
-						getGitExecutable(path).then((exec) => resolve(exec), () => reject());
+						getGitExecutable(path).then(
+							(exec) => resolve(exec),
+							() => reject()
+						);
 					}
 				});
 			}
@@ -704,7 +1071,13 @@ function findGitOnWin32() {
 	return findSystemGitWin32(process.env['ProgramW6432'])
 		.then(undefined, () => findSystemGitWin32(process.env['ProgramFiles(x86)']))
 		.then(undefined, () => findSystemGitWin32(process.env['ProgramFiles']))
-		.then(undefined, () => findSystemGitWin32(process.env['LocalAppData'] ? path.join(process.env['LocalAppData']!, 'Programs') : undefined))
+		.then(undefined, () =>
+			findSystemGitWin32(
+				process.env['LocalAppData']
+					? path.join(process.env['LocalAppData']!, 'Programs')
+					: undefined
+			)
+		)
 		.then(undefined, () => findGitWin32InPath());
 }
 function findSystemGitWin32(pathBase?: string) {
@@ -721,7 +1094,7 @@ async function findGitWin32InPath() {
 		if (await isExecutable(file)) {
 			try {
 				return await getGitExecutable(file);
-			} catch (_) { }
+			} catch (_) {}
 		}
 	}
 	return Promise.reject<GitExecutable>();
@@ -733,7 +1106,7 @@ async function findGitWin32InPath() {
  * @returns TRUE => Executable, FALSE => Not an Executable.
  */
 function isExecutable(path: string) {
-	return new Promise<boolean>(resolve => {
+	return new Promise<boolean>((resolve) => {
 		fs.stat(path, (err, stat) => {
 			resolve(!err && (stat.isFile() || stat.isSymbolicLink()));
 		});
@@ -749,7 +1122,13 @@ export function getGitExecutable(path: string) {
 	return new Promise<GitExecutable>((resolve, reject) => {
 		resolveSpawnOutput(cp.spawn(path, ['--version'])).then((values) => {
 			if (values[0].code === 0) {
-				resolve({ path: path, version: values[1].toString().trim().replace(/^git version /, '') });
+				resolve({
+					path: path,
+					version: values[1]
+						.toString()
+						.trim()
+						.replace(/^git version /, '')
+				});
 			} else {
 				reject();
 			}
@@ -762,27 +1141,28 @@ export function getGitExecutable(path: string) {
  * @param paths The paths of possible Git executables.
  * @returns The GitExecutable data.
  */
-export async function getGitExecutableFromPaths(paths: string[]): Promise<GitExecutable> {
+export async function getGitExecutableFromPaths(
+	paths: string[]
+): Promise<GitExecutable> {
 	for (let i = 0; i < paths.length; i++) {
 		try {
 			return await getGitExecutable(paths[i]);
-		} catch (_) { }
+		} catch (_) {}
 	}
 	throw new Error('None of the provided paths are a Git executable');
 }
 
-
 /* Version Handling / Requirements */
 
 export const enum GitVersionRequirement {
-	FetchAndPruneTags = '2.17.0',
-	GpgInfo = '2.4.0',
-	PushStash = '2.13.2',
-	TagDetails = '1.7.8'
+  FetchAndPruneTags = '2.17.0',
+  GpgInfo = '2.4.0',
+  PushStash = '2.13.2',
+  TagDetails = '1.7.8',
 }
 
 export const enum VsCodeVersionRequirement {
-	Codicons = '1.42.0'
+  Codicons = '1.42.0',
 }
 
 /**
@@ -791,7 +1171,10 @@ export const enum VsCodeVersionRequirement {
  * @param requiredVersion The minimum required version.
  * @returns TRUE => `version` is at least `requiredVersion`, FALSE => `version` is older than `requiredVersion`.
  */
-export function doesVersionMeetRequirement(version: string, requiredVersion: GitVersionRequirement | VsCodeVersionRequirement) {
+export function doesVersionMeetRequirement(
+	version: string,
+	requiredVersion: GitVersionRequirement | VsCodeVersionRequirement
+) {
 	const v1 = parseVersion(version);
 	const v2 = parseVersion(requiredVersion);
 
@@ -839,6 +1222,18 @@ function parseVersion(version: string) {
  * @param feature An optional name for the feature.
  * @returns The message for the user.
  */
-export function constructIncompatibleGitVersionMessage(executable: GitExecutable, version: GitVersionRequirement, feature?: string) {
-	return 'A newer version of Git (>= ' + version + ') is required for ' + (feature ? feature : 'this feature') + '. Git ' + executable.version + ' is currently installed. Please install a newer version of Git to use this feature.';
+export function constructIncompatibleGitVersionMessage(
+	executable: GitExecutable,
+	version: GitVersionRequirement,
+	feature?: string
+) {
+	return (
+		'A newer version of Git (>= ' +
+    version +
+    ') is required for ' +
+    (feature ? feature : 'this feature') +
+    '. Git ' +
+    executable.version +
+    ' is currently installed. Please install a newer version of Git to use this feature.'
+	);
 }

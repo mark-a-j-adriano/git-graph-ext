@@ -21,6 +21,7 @@ import {
 import {
 	UNABLE_TO_FIND_GIT_MSG,
 	UNCOMMITTED,
+	applyWorktreeColorTheme,
 	archive,
 	copyFilePathToClipboard,
 	copyToClipboard,
@@ -29,6 +30,8 @@ import {
 	openExtensionSettings,
 	openExternalUrl,
 	openFile,
+	openFolderInNewWindow,
+	revealInFileExplorer,
 	showErrorMessage,
 	viewDiff,
 	viewDiffWithWorkingFile,
@@ -45,11 +48,11 @@ export class GitGraphView extends Disposable {
 
   private readonly panel: vscode.WebviewPanel;
   private readonly extensionPath: string;
-  private readonly avatarManager: AvatarManager;
   private readonly dataSource: DataSource;
   private readonly extensionState: ExtensionState;
-  private readonly repoFileWatcher: RepoFileWatcher;
+  private readonly avatarManager: AvatarManager;
   private readonly repoManager: RepoManager;
+  private readonly repoFileWatcher: RepoFileWatcher;
   private readonly logger: Logger;
   private isGraphViewLoaded: boolean = false;
   private isPanelVisible: boolean = true;
@@ -448,6 +451,29 @@ export class GitGraphView extends Disposable {
   				)
   			});
   			break;
+  		case 'createWorktree': {
+  			const worktreePath = path.isAbsolute(msg.worktreePath)
+  				? msg.worktreePath
+  				: path.join(msg.repo, msg.worktreePath);
+  			let error = await this.dataSource.createWorktree(
+  				msg.repo,
+  				msg.branchName,
+  				msg.worktreePath,
+  				msg.startPoint
+  			);
+  			if (error === null && msg.colorTheme !== null) {
+  				error = await applyWorktreeColorTheme(worktreePath, msg.colorTheme);
+  			}
+  			if (msg.openInNewWindow) {
+  				const openError = await openFolderInNewWindow(worktreePath);
+  				if (error === null) error = openError;
+  			}
+  			this.sendMessage({
+  				command: 'createWorktree',
+  				error: error
+  			});
+  			break;
+  		}
   		case 'createPullRequest':
   			errorInfos = [
   				msg.push
@@ -767,6 +793,34 @@ export class GitGraphView extends Disposable {
   					msg.hash,
   					this.dataSource
   				)
+  			});
+  			break;
+  		case 'openWorktree':
+  			this.sendMessage({
+  				command: 'openWorktree',
+  				error: await openFolderInNewWindow(msg.worktreePath)
+  			});
+  			break;
+  		case 'pruneWorktrees':
+  			this.sendMessage({
+  				command: 'pruneWorktrees',
+  				error: await this.dataSource.pruneWorktrees(msg.repo)
+  			});
+  			break;
+  		case 'removeWorktree':
+  			this.sendMessage({
+  				command: 'removeWorktree',
+  				error: await this.dataSource.removeWorktree(
+  					msg.repo,
+  					msg.worktreePath,
+  					msg.force
+  				)
+  			});
+  			break;
+  		case 'revealWorktree':
+  			this.sendMessage({
+  				command: 'revealWorktree',
+  				error: await revealInFileExplorer(msg.worktreePath)
   			});
   			break;
   		case 'openTerminal':
@@ -1116,6 +1170,7 @@ export class GitGraphView extends Disposable {
 			<div id="view" tabindex="-1">
 				<div id="controls">
 					<span id="repoControl"><span class="unselectable">Repo: </span><div id="repoDropdown" class="dropdown"></div></span>
+          <span id="worktreeStatusControl" class="unselectable"></span>
 					<span id="branchControl"><span class="unselectable">Branches: </span><div id="branchDropdown" class="dropdown"></div></span>
 					<span id="branchCreationDateControl" title="Filter local branches by their earliest local reflog entry."><span class="unselectable">Created: </span><select id="branchCreationDateDropdown"></select></span>
 					<span id="branchUpdatedDateControl" title="Filter local branches by their latest local reflog entry."><span class="unselectable">Updated: </span><select id="branchUpdatedDateDropdown"></select></span>

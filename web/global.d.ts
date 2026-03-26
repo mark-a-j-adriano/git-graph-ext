@@ -48,6 +48,7 @@ declare global {
     readonly gitRepos: GG.GitRepoSet;
     readonly gitBranches: ReadonlyArray<string>;
     readonly gitBranchInfos?: ReadonlyArray<GG.GitBranchInfo>;
+    readonly gitWorktrees?: ReadonlyArray<GG.GitWorktreeInfo>;
     readonly gitBranchHead: string | null;
     readonly gitConfig: GG.GitRepoConfig | null;
     readonly gitRemotes: ReadonlyArray<string>;

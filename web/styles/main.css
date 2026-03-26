@@ -804,6 +804,23 @@ body.vscode-high-contrast #commitTable tr.commit.findCurrentCommit {
   line-height: 18px;
   padding: 0 5px;
 }
+.gitRefWorktreeBadge {
+  display: inline-block;
+  height: 14px;
+  line-height: 14px;
+  margin: 2px 4px 0 0;
+  padding: 0 5px;
+  border-radius: 999px;
+  background-color: var(--vscode-badge-background);
+  color: var(--vscode-badge-foreground);
+  font-size: 10px;
+  font-weight: 700;
+  vertical-align: top;
+}
+.gitRefWorktreeBadge.current {
+  background-color: var(--vscode-testing-iconPassed);
+  color: var(--vscode-editor-background);
+}
 .gitRefHeadRemote {
   border-left: 1px solid rgba(128, 128, 128, 0.45);
   font-style: italic;
@@ -883,6 +900,7 @@ body.tagLabelsRightAligned .gitRef.tag {
 }
 
 #repoControl,
+#worktreeStatusControl,
 #branchControl,
 #branchCreationDateControl,
 #branchUpdatedDateControl,
@@ -915,6 +933,19 @@ body.tagLabelsRightAligned .gitRef.tag {
 }
 #controls.singleRepo #repoControl {
   display: none;
+}
+#worktreeStatusControl {
+  display: none;
+  padding: 0 8px;
+  border: 1px solid var(--vscode-inputOption-activeBorder);
+  border-radius: 999px;
+  color: var(--vscode-badge-foreground);
+  background: var(--vscode-badge-background);
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 22px;
+  vertical-align: middle;
+  cursor: pointer;
 }
 #controls.singleRepo .dropdownCurrentValue {
   max-width: 40vw;
