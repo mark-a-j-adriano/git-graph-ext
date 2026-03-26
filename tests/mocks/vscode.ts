@@ -46,7 +46,7 @@ export const mocks = {
       get: jest.fn(),
       update: jest.fn(),
     },
-  },
+  } as unknown as vscode.ExtensionContext,
   outputChannel: {
     appendLine: jest.fn(),
     dispose: jest.fn(),
@@ -318,6 +318,7 @@ function createWebviewPanel(
     reveal: jest.fn((_viewColumn?: ViewColumn, _preserveFocus?: boolean) => {}),
     title: title,
     visible: true,
+    viewColumn: ViewColumn.One,
     viewType: viewType,
     webview: {
       asWebviewUri: jest.fn((uri: Uri) =>

@@ -129,8 +129,10 @@ Scope:
 
 - Add a collapsible side bar sub panel UNDER the GIT Panel to show the list of `.git/info/exclude` entries.
 - Let users enable or disable an exclude option with a checkbox in that panel.
+- Let users delete local exclude entries from that panel.
 - Add a File Explorer side bar context menu action for files and folders named `Add to Local Exclude List`.
 - When a user right-clicks a file or folder in File Explorer and selects that action, append the path to `.git/info/exclude`.
+- Add a collapsible `Favorites` subpanel in Explorer so monorepo folders can be pinned above the normal File Explorer.
 - Bump the extension version before packaging the batch.
 
 Checklist:
@@ -138,23 +140,30 @@ Checklist:
 - [x] Add a collapsible side bar panel for local exclude entries.
 - [x] Read and parse `.git/info/exclude` into editable list items.
 - [x] Add checkbox state for enable and disable behavior.
+- [x] Add delete actions for active and inactive local exclude entries.
 - [x] Add File Explorer context menu contribution for files and folders.
 - [x] Append selected file or folder paths to `.git/info/exclude`.
 - [x] Refresh the exclude panel after updates.
+- [x] Add a collapsible `Favorites` Explorer subpanel.
+- [x] Add Explorer context menu actions to add and remove favorite folders.
+- [x] Render favorite folders with normal tree behavior for folders and files.
 - [x] Package a unique VSIX for testing.
 
 Test output:
 
 - Back-end compile is green.
 - Focused `localExcludeListView` tests are green.
-- Current packaged build: `git-graph-1.30.13.vsix`
+- Focused `favoritesView` tests are green.
+- Current packaged build: `git-graph-1.30.14.vsix`
 - Native tree-view checkboxes are implemented.
+- Local exclude entries support activate, deactivate, and delete actions.
+- Explorer now includes a `Favorites` view for pinned folders.
 - Extension engine target is now VS Code `^1.95.0` for the checkbox-enabled tree view API.
 - Direct `vsce` packing is still used for packaging because the normal prepublish flow remains blocked by existing repository-wide lint warnings.
 
 ### Batch 6
 
-Status: Planned.
+Status: In progress.
 
 Scope:
 
@@ -165,11 +174,56 @@ Scope:
 
 Checklist:
 
-- [ ] Review direct dependencies in `package.json`.
-- [ ] Review lockfile changes needed for safe upgrades.
-- [ ] Identify outdated packages and classify low-risk versus follow-up updates.
+- [x] Review direct dependencies in `package.json`.
+- [x] Review lockfile changes needed for safe upgrades.
+- [x] Identify outdated packages and classify low-risk versus follow-up updates.
 - [ ] Validate compile, lint, and packaging after dependency changes.
-- [ ] Package a unique VSIX for testing if updates are shipped.
+- [x] Package a unique VSIX for testing if updates are shipped.
+
+Test output:
+
+- Back-end compile is green.
+- Front-end compile is green.
+- Current packaged build: `git-graph-1.30.15.vsix`
+- Installed `@types/vscode` is now aligned with the declared `1.95.0` version in `package.json`.
+- `uglify-js` was updated to `3.19.3` as a low-risk build tooling refresh.
+- Full lint is still blocked by the repository's existing warning backlog.
+- Full unit tests still need follow-up because existing `dataSource` test failures remain outside this dependency-only change set.
+
+### Batch 7
+
+Status: In progress.
+
+Scope:
+
+- Add profiling and logging improvements so it is easier to understand whether this extension is contributing to VS Code slowdowns or instability.
+- Review file watchers and event subscriptions to reduce unnecessary work, improve performance, and avoid memory leaks.
+- Add a clearer cleanup cycle so long-running extension sessions do not accumulate stale resources or excessive memory usage.
+- Bump the extension version before packaging the batch.
+
+Checklist:
+
+- [x] Review existing logger coverage and identify gaps around activation, long-running operations, and disposal.
+- [x] Add lightweight timing and diagnostic logging for expensive extension operations.
+- [x] Add a user-visible way to inspect or export relevant extension diagnostics when troubleshooting.
+- [x] Audit watcher creation, reuse, and disposal paths across the extension.
+- [x] Reduce unnecessary refreshes, duplicate listeners, or repeated filesystem work.
+- [x] Review cleanup paths for tree views, webviews, watchers, and cached state.
+- [x] Add or tighten disposal and teardown coverage in focused tests.
+- [ ] Validate compile, focused tests, and packaging after the lifecycle changes.
+- [ ] Package a unique VSIX for testing.
+
+Test output:
+
+- Back-end compile is green.
+- Focused `commands` tests are green.
+- Focused `repoFileWatcher` tests are green.
+- Focused `logger`, `avatarManager`, and `repoManager` tests are green.
+- A new `git-graph.diagnostics` command now exposes logger, repository watcher, queue, and Git Graph view state in a copyable modal.
+- Repo watcher startup now avoids recreating the same watcher when the active repository has not changed.
+- Workspace repo scans now coalesce repeated requests, abandon stale traversals, and log slow scans.
+- Git command execution now records timing counters and only emits slow-operation logs when thresholds are exceeded.
+- Clearing the avatar cache now also clears queued avatar work, tears down the fetch interval, and drops cached remote lookup state.
 
 ---
 

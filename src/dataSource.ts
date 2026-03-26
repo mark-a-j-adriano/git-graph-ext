@@ -2941,23 +2941,45 @@ export class DataSource extends Disposable {
         return reject(UNABLE_TO_FIND_GIT_MSG);
       }
 
+      const startedAt = Date.now();
+
+      this.logger.logCmd("git", args);
+
       resolveSpawnOutput(
         cp.spawn(this.gitExecutable.path, args, {
           cwd: repo,
           env: Object.assign({}, process.env, this.askpassEnv),
         }),
-      ).then((values) => {
-        const status = values[0],
-          stdout = values[1],
-          stderr = values[2];
-        if (status.code === 0 || ignoreExitCode) {
-          resolve(resolveValue(stdout, stderr));
-        } else {
-          reject(getErrorMessage(status.error, stdout, stderr));
-        }
-      });
-
-      this.logger.logCmd("git", args);
+      )
+        .then((values) => {
+          const status = values[0],
+            stdout = values[1],
+            stderr = values[2];
+          if (status.code === 0 || ignoreExitCode) {
+            resolve(resolveValue(stdout, stderr));
+          } else {
+            reject(getErrorMessage(status.error, stdout, stderr));
+          }
+        })
+        .then(
+          () => {
+            this.logger.logDuration(
+              "git " + (args[0] ?? "command"),
+              Date.now() - startedAt,
+              500,
+              path.basename(repo),
+            );
+          },
+          (err) => {
+            this.logger.logDuration(
+              "git " + (args[0] ?? "command"),
+              Date.now() - startedAt,
+              500,
+              path.basename(repo),
+            );
+            reject(err);
+          },
+        );
     });
   }
 }

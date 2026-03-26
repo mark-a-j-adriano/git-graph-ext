@@ -39,6 +39,16 @@ import {
 } from "./utils";
 import { Disposable, toDisposable } from "./utils/disposable";
 
+export interface GitGraphViewDiagnostics {
+  readonly active: boolean;
+  readonly visible: boolean;
+  readonly loaded: boolean;
+  readonly currentRepo: string | null;
+  readonly repoFileWatcher: ReturnType<
+    RepoFileWatcher["getDiagnostics"]
+  > | null;
+}
+
 /**
  * Manages the Git Graph View.
  */
@@ -112,6 +122,23 @@ export class GitGraphView extends Disposable {
         column,
       );
     }
+  }
+
+  /**
+   * Get lightweight diagnostics for the current Git Graph view instance.
+   */
+  public static getDiagnostics(): GitGraphViewDiagnostics {
+    if (typeof GitGraphView.currentPanel === "undefined") {
+      return {
+        active: false,
+        visible: false,
+        loaded: false,
+        currentRepo: null,
+        repoFileWatcher: null,
+      };
+    }
+
+    return GitGraphView.currentPanel.getDiagnostics();
   }
 
   /**
@@ -1065,6 +1092,16 @@ export class GitGraphView extends Disposable {
     }
 
     this.repoFileWatcher.unmute();
+  }
+
+  private getDiagnostics(): GitGraphViewDiagnostics {
+    return {
+      active: true,
+      visible: this.isPanelVisible,
+      loaded: this.isGraphViewLoaded,
+      currentRepo: this.currentRepo,
+      repoFileWatcher: this.repoFileWatcher.getDiagnostics(),
+    };
   }
 
   /**
