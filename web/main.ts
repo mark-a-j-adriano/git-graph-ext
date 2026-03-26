@@ -2263,6 +2263,12 @@ class GitGraphView {
       ],
       [
         {
+          title: "Create Archive",
+          visible: visibility.createLocalBranch,
+          onClick: () =>
+            this.createBranchArchiveAction(refName, target.hash, target),
+        },
+        {
           title: "Create Branch" + ELLIPSIS,
           visible: visibility.createLocalBranch,
           onClick: () =>
@@ -2827,6 +2833,12 @@ class GitGraphView {
         },
       ],
       [
+        {
+          title: "Create Archive",
+          visible: visibility.createLocalBranch && branchName !== "HEAD",
+          onClick: () =>
+            this.createBranchArchiveAction(branchName, target.hash, target),
+        },
         {
           title: "Create Branch" + ELLIPSIS,
           visible: visibility.createLocalBranch,
@@ -3655,6 +3667,53 @@ class GitGraphView {
     target: DialogTarget & RefTarget,
   ) {
     this.createBranchAction(hash, initialName, initialCheckOut, target);
+  }
+
+  private createBranchArchiveAction(
+    branchName: string,
+    hash: string,
+    target: DialogTarget & RefTarget,
+  ) {
+    const archiveBranchName = this.getArchiveBranchName(branchName);
+    dialog.showConfirmation(
+      "Are you sure you want to create the archive branch <b><i>" +
+        escapeHtml(archiveBranchName) +
+        "</i></b> from <b><i>" +
+        escapeHtml(branchName) +
+        "</i></b>?",
+      "Yes, create",
+      () => {
+        runAction(
+          {
+            command: "createBranch",
+            repo: this.currentRepo,
+            branchName: archiveBranchName,
+            commitHash: hash,
+            checkout: false,
+            force: false,
+          },
+          "Creating Archive",
+        );
+      },
+      target,
+    );
+  }
+
+  private getArchiveBranchName(branchName: string) {
+    const now = new Date();
+    return (
+      branchName +
+      "-" +
+      this.pad2(now.getDate()) +
+      this.pad2(now.getMonth() + 1) +
+      now.getFullYear() +
+      this.pad2(now.getHours()) +
+      this.pad2(now.getMinutes())
+    );
+  }
+
+  private pad2(value: number) {
+    return value.toString().padStart(2, "0");
   }
 
   private createWorktreeAction(

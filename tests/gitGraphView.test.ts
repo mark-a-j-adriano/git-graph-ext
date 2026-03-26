@@ -1187,7 +1187,7 @@ describe("GitGraphView", () => {
         await waitForExpect(() => {
           expect(spyOnCreateBranch).toHaveBeenCalledWith(
             "/path/to/repo",
-            "feature/test-050620240708",
+            "feature/test-060520240708",
             "origin/feature/test",
             false,
             false,

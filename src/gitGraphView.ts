@@ -1116,8 +1116,8 @@ export class GitGraphView extends Disposable {
     return (
       branchName +
       "-" +
-      this.pad2(now.getMonth() + 1) +
       this.pad2(now.getDate()) +
+      this.pad2(now.getMonth() + 1) +
       now.getFullYear() +
       this.pad2(now.getHours()) +
       this.pad2(now.getMinutes())
