@@ -1,7 +1,7 @@
 {
   "name": "git-graph",
   "displayName": "Git Graph",
-  "version": "1.30.9",
+  "version": "1.30.11",
   "publisher": "mhutchie",
   "author": {
     "name": "Michael Hutchison",
@@ -177,9 +177,9 @@
                   "type": "boolean",
                   "title": "Create Pull Request..."
                 },
-                "createArchive": {
+                "createLocalBranch": {
                   "type": "boolean",
-                  "title": "Create Archive"
+                  "title": "Create Branch..."
                 },
                 "selectInBranchesDropdown": {
                   "type": "boolean",
@@ -316,9 +316,9 @@
                   "type": "boolean",
                   "title": "Create Pull Request"
                 },
-                "createArchive": {
+                "createLocalBranch": {
                   "type": "boolean",
-                  "title": "Create Archive"
+                  "title": "Create Branch..."
                 },
                 "selectInBranchesDropdown": {
                   "type": "boolean",
@@ -378,9 +378,9 @@
                   "type": "boolean",
                   "title": "Push Tag..."
                 },
-                "createArchive": {
+                "createLocalBranch": {
                   "type": "boolean",
-                  "title": "Create Archive"
+                  "title": "Create Branch..."
                 },
                 "copyName": {
                   "type": "boolean",

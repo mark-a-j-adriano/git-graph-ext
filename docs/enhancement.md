@@ -57,7 +57,7 @@ Test output:
 
 ### Batch 2
 
-Status: In progress.
+Status: Finished.
 
 Scope:
 
@@ -65,9 +65,22 @@ Scope:
 - Place the worktree actions as a separate group near existing commit copy actions.
 - Bump the extension version before packaging the batch.
 
+Checklist:
+
+- [x] Add worktree actions to the branch and remote branch context menus.
+- [x] Add worktree status actions for open, reveal, remove, and prune flows.
+- [x] Show worktree indicators in the graph and branch dropdown.
+- [x] Package a unique VSIX for testing.
+
+Test output:
+
+- Current packaged build: `git-graph-1.30.9.vsix`
+- Compile is green.
+- Full automated test suite still needs follow-up updates for changed contracts.
+
 ### Batch 3
 
-Status: Planned.
+Status: In progress.
 
 Scope:
 
@@ -78,20 +91,67 @@ Scope:
 
 Checklist:
 
-- [x] Add Peacock preset options for new worktree windows.
+- [x] Add preset theme options for new worktree windows.
 - [x] Apply selected worktree theme customizations on creation.
 - [x] Keep the theme selector visible in the create-worktree form until conditional field visibility is supported.
 - [ ] Revisit conditional theme field visibility if the dialog system gains show/hide support.
 
 ### Batch 4
 
-Status: Planned.
+Status: In progress.
 
 Scope:
 
 - When a branch is created from another branch using the right-click menu options, and the source branch is not `main`, create a backup copy of the original branch first.
-- Name the backup branch with the `mmddyyyyhhmm`date prefix format.
+- Name the backup branch with the `-mmddyyyyhhmm`date prefix format.
 - Bump the extension version before packaging the batch.
+
+Checklist:
+
+- [x] Restart Batch 4 from the 1.30.9 baseline.
+- [x] Re-implement backup creation using the existing checkout request flow.
+- [x] Validate the backup flow with a focused unit test and compile the extension.
+
+### Batch 5
+
+Status: Planned.
+
+Scope:
+
+- Add a collapsible side bar sub panel UNDER the GIT Panel to show the list of `.git/info/exclude` entries.
+- Let users enable or disable an exclude option with a checkbox in that panel.
+- Add a File Explorer side bar context menu action for files and folders named `Add to Local Exclude List`.
+- When a user right-clicks a file or folder in File Explorer and selects that action, append the path to `.git/info/exclude`.
+- Bump the extension version before packaging the batch.
+
+Checklist:
+
+- [ ] Add a collapsible side bar panel for local exclude entries.
+- [ ] Read and parse `.git/info/exclude` into editable list items.
+- [ ] Add checkbox state for enable and disable behavior.
+- [ ] Add File Explorer context menu contribution for files and folders.
+- [ ] Append selected file or folder paths to `.git/info/exclude`.
+- [ ] Refresh the exclude panel after updates.
+- [ ] Package a unique VSIX for testing.
+
+### Batch 6
+
+Status: Planned.
+
+Scope:
+
+- Review `package.json` and lockfile updates that can keep this repository's packages current.
+- Identify safe dependency and tooling updates with minimal feature risk.
+- Separate routine package maintenance from functional feature changes.
+- Bump the extension version before packaging the batch if dependency updates are shipped.
+
+Checklist:
+
+- [ ] Review direct dependencies in `package.json`.
+- [ ] Review lockfile changes needed for safe upgrades.
+- [ ] Identify outdated packages and classify low-risk versus follow-up updates.
+- [ ] Validate compile, lint, and packaging after dependency changes.
+- [ ] Package a unique VSIX for testing if updates are shipped.
 
 ---
 

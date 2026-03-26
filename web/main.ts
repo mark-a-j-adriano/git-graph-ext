@@ -2263,18 +2263,15 @@ class GitGraphView {
       ],
       [
         {
-          title: "Create Archive",
-          visible: visibility.createArchive,
-          onClick: () => {
-            runAction(
-              {
-                command: "createArchive",
-                repo: this.currentRepo,
-                ref: refName,
-              },
-              "Creating Archive",
-            );
-          },
+          title: "Create Branch" + ELLIPSIS,
+          visible: visibility.createLocalBranch,
+          onClick: () =>
+            this.createBranchFromRefAction(
+              target.hash,
+              "",
+              this.config.dialogDefaults.createBranch.checkout,
+              target,
+            ),
         },
         {
           title: "Select in Branches Dropdown",
@@ -2831,18 +2828,15 @@ class GitGraphView {
       ],
       [
         {
-          title: "Create Archive",
-          visible: visibility.createArchive,
-          onClick: () => {
-            runAction(
-              {
-                command: "createArchive",
-                repo: this.currentRepo,
-                ref: refName,
-              },
-              "Creating Archive",
-            );
-          },
+          title: "Create Branch" + ELLIPSIS,
+          visible: visibility.createLocalBranch,
+          onClick: () =>
+            this.createBranchFromRefAction(
+              target.hash,
+              branchName !== "HEAD" ? branchName : "",
+              this.config.dialogDefaults.createBranch.checkout,
+              target,
+            ),
         },
         {
           title: "Select in Branches Dropdown",
@@ -3158,18 +3152,15 @@ class GitGraphView {
       ],
       [
         {
-          title: "Create Archive",
-          visible: visibility.createArchive,
-          onClick: () => {
-            runAction(
-              {
-                command: "createArchive",
-                repo: this.currentRepo,
-                ref: tagName,
-              },
-              "Creating Archive",
-            );
-          },
+          title: "Create Branch" + ELLIPSIS,
+          visible: visibility.createLocalBranch,
+          onClick: () =>
+            this.createBranchFromRefAction(
+              target.hash,
+              "",
+              this.config.dialogDefaults.createBranch.checkout,
+              target,
+            ),
         },
         {
           title: "Copy Tag Name to Clipboard",
@@ -3655,6 +3646,15 @@ class GitGraphView {
       },
       target,
     );
+  }
+
+  private createBranchFromRefAction(
+    hash: string,
+    initialName: string,
+    initialCheckOut: boolean,
+    target: DialogTarget & RefTarget,
+  ) {
+    this.createBranchAction(hash, initialName, initialCheckOut, target);
   }
 
   private createWorktreeAction(
@@ -6489,9 +6489,6 @@ window.addEventListener("load", () => {
           msg.error,
           "Unable to Copy " + msg.type + " to Clipboard",
         );
-        break;
-      case "createArchive":
-        finishOrDisplayError(msg.error, "Unable to Create Archive", true);
         break;
       case "createBranch":
         refreshAndDisplayErrors(msg.errors, "Unable to Create Branch");
