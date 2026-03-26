@@ -5,6 +5,7 @@ import { getConfig } from "./config";
 import { DataSource } from "./dataSource";
 import { DiffDocProvider } from "./diffDocProvider";
 import { ExtensionState } from "./extensionState";
+import { FavoritesView } from "./favoritesView";
 import { onStartUp } from "./life-cycle/startup";
 import { Logger } from "./logger";
 import { LocalExcludeListView } from "./localExcludeListView";
@@ -73,6 +74,7 @@ export async function activate(context: vscode.ExtensionContext) {
     repoManager,
     logger,
   );
+  const favoritesView = new FavoritesView(context.workspaceState, logger);
   const statusBarItem = new StatusBarItem(
     repoManager.getNumRepos(),
     repoManager.onDidChangeRepos,
@@ -132,6 +134,7 @@ export async function activate(context: vscode.ExtensionContext) {
     diffDocProvider,
     commandManager,
     localExcludeListView,
+    favoritesView,
     statusBarItem,
     repoManager,
     avatarManager,

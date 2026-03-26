@@ -37,7 +37,7 @@ class LocalExcludeEntryTreeItem extends vscode.TreeItem {
     this.enabled = entry.enabled;
     this.description = entry.enabled ? "enabled" : "disabled";
     this.tooltip = repo + "/.git/info/exclude\n" + entry.pattern;
-    ((this as unknown) as { checkboxState: number }).checkboxState = entry.enabled
+    (this as unknown as { checkboxState: number }).checkboxState = entry.enabled
       ? TREE_ITEM_CHECKBOX_STATE_CHECKED
       : TREE_ITEM_CHECKBOX_STATE_UNCHECKED;
     this.contextValue = entry.enabled
@@ -123,6 +123,20 @@ export class LocalExcludeListView
       "git-graph.addToLocalExcludeList",
       (resource?: vscode.Uri, resources?: vscode.Uri[]) =>
         this.addToLocalExcludeList(resource, resources),
+    );
+    this.registerCommand(
+      "git-graph.enableLocalExcludeEntry",
+      (item: LocalExcludeEntryTreeItem) =>
+        this.setLocalExcludeEntryState(item.repo, item.pattern, true),
+    );
+    this.registerCommand(
+      "git-graph.disableLocalExcludeEntry",
+      (item: LocalExcludeEntryTreeItem) =>
+        this.setLocalExcludeEntryState(item.repo, item.pattern, false),
+    );
+    this.registerCommand(
+      "git-graph.deleteLocalExcludeEntry",
+      (item: LocalExcludeEntryTreeItem) => this.deleteLocalExcludeEntry(item),
     );
     this.registerCommand(
       "git-graph.toggleLocalExcludeEntry",
@@ -359,6 +373,29 @@ export class LocalExcludeListView
     this.refresh();
   }
 
+  private async deleteLocalExcludeEntry(item: LocalExcludeEntryTreeItem) {
+    const excludeFilePath = await this.dataSource.getExcludeFilePath(item.repo);
+    if (excludeFilePath === null) {
+      showErrorMessage(
+        'Unable to resolve the local exclude file for repository "' +
+          getRepoName(item.repo) +
+          '".',
+      );
+      return;
+    }
+
+    const error = await removePatternFromExcludeFile(
+      excludeFilePath,
+      item.pattern,
+    );
+    if (error !== null) {
+      showErrorMessage(error);
+      return;
+    }
+
+    this.refresh();
+  }
+
   private async getPatternForUri(repo: string, uri: vscode.Uri) {
     const uriPath = getPathFromUri(uri);
     const relativePath = path.relative(repo, uriPath).replace(/\\/g, "/");
@@ -503,5 +540,28 @@ async function setPatternEnabledInExcludeFile(
   }
 
   lines[lineIndex] = replacementLine;
+  return writeTextFile(excludeFilePath, lines.join(eol));
+}
+
+async function removePatternFromExcludeFile(
+  excludeFilePath: string,
+  pattern: string,
+) {
+  const contents = await readTextFile(excludeFilePath);
+  if (contents.error !== null) return contents.error;
+
+  const eol = detectEol(contents.contents);
+  const lines = contents.contents.split(/\r\n|\r|\n/);
+  const lineIndex = lines.findIndex((line) => {
+    const trimmedLine = line.trim();
+    return (
+      trimmedLine === pattern || trimmedLine === DISABLED_ENTRY_PREFIX + pattern
+    );
+  });
+  if (lineIndex === -1) {
+    return "Unable to find the selected local exclude entry.";
+  }
+
+  lines.splice(lineIndex, 1);
   return writeTextFile(excludeFilePath, lines.join(eol));
 }

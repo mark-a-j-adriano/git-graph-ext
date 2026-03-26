@@ -109,11 +109,47 @@
       },
       {
         "category": "Git Graph",
+        "command": "git-graph.enableLocalExcludeEntry",
+        "title": "Activate Local Exclude Entry"
+      },
+      {
+        "category": "Git Graph",
+        "command": "git-graph.disableLocalExcludeEntry",
+        "title": "Deactivate Local Exclude Entry"
+      },
+      {
+        "category": "Git Graph",
+        "command": "git-graph.deleteLocalExcludeEntry",
+        "title": "Delete Local Exclude Entry"
+      },
+      {
+        "category": "Git Graph",
         "command": "git-graph.toggleLocalExcludeEntry",
         "title": "Toggle Local Exclude Entry"
+      },
+      {
+        "category": "Git Graph",
+        "command": "git-graph.addFavoriteFolder",
+        "title": "Add Folder to Favorites"
+      },
+      {
+        "category": "Git Graph",
+        "command": "git-graph.removeFavoriteFolder",
+        "title": "Remove Folder from Favorites"
+      },
+      {
+        "category": "Git Graph",
+        "command": "git-graph.refreshFavoriteFolders",
+        "title": "Refresh Favorites"
       }
     ],
     "views": {
+      "explorer": [
+        {
+          "id": "git-graph.favoriteFolders",
+          "name": "Favorites"
+        }
+      ],
       "scm": [
         {
           "id": "git-graph.localExcludeList",
@@ -1534,12 +1570,27 @@
       ],
       "explorer/context": [
         {
+          "command": "git-graph.addFavoriteFolder",
+          "when": "resourceScheme == file && explorerResourceIsFolder",
+          "group": "2_git-graph@1"
+        },
+        {
+          "command": "git-graph.removeFavoriteFolder",
+          "when": "resourceScheme == file && explorerResourceIsFolder",
+          "group": "2_git-graph@2"
+        },
+        {
           "command": "git-graph.addToLocalExcludeList",
           "when": "resourceScheme == file",
-          "group": "2_git-graph"
+          "group": "2_git-graph@3"
         }
       ],
       "view/title": [
+        {
+          "command": "git-graph.refreshFavoriteFolders",
+          "when": "view == git-graph.favoriteFolders",
+          "group": "navigation"
+        },
         {
           "command": "git-graph.refreshLocalExcludeList",
           "when": "view == git-graph.localExcludeList",
@@ -1548,13 +1599,28 @@
       ],
       "view/item/context": [
         {
-          "command": "git-graph.toggleLocalExcludeEntry",
+          "command": "git-graph.disableLocalExcludeEntry",
           "when": "view == git-graph.localExcludeList && viewItem == git-graph.localExcludeEntry.enabled",
           "group": "inline"
         },
         {
-          "command": "git-graph.toggleLocalExcludeEntry",
+          "command": "git-graph.enableLocalExcludeEntry",
           "when": "view == git-graph.localExcludeList && viewItem == git-graph.localExcludeEntry.disabled",
+          "group": "inline"
+        },
+        {
+          "command": "git-graph.deleteLocalExcludeEntry",
+          "when": "view == git-graph.localExcludeList && viewItem == git-graph.localExcludeEntry.enabled",
+          "group": "inline@2"
+        },
+        {
+          "command": "git-graph.deleteLocalExcludeEntry",
+          "when": "view == git-graph.localExcludeList && viewItem == git-graph.localExcludeEntry.disabled",
+          "group": "inline@2"
+        },
+        {
+          "command": "git-graph.removeFavoriteFolder",
+          "when": "view == git-graph.favoriteFolders && viewItem == git-graph.favoriteRoot",
           "group": "inline"
         }
       ]

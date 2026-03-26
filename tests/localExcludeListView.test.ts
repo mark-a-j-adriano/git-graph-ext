@@ -203,4 +203,66 @@ describe("LocalExcludeListView", () => {
       expect(spyOnWriteFile).toHaveBeenCalled();
     });
   });
+
+  it("Should delete an enabled local exclude entry", async () => {
+    spyOnReadFile.mockImplementation(
+      (
+        _: string,
+        __: string,
+        callback: (err: NodeJS.ErrnoException | null, data: string) => void,
+      ) => {
+        callback(null, "node_modules\ndist/\n");
+      },
+    );
+    spyOnWriteFile.mockImplementation(
+      (
+        _: string,
+        contents: string,
+        __: string,
+        callback: (err: NodeJS.ErrnoException | null) => void,
+      ) => {
+        expect(contents).toBe("dist/\n");
+        callback(null);
+      },
+    );
+
+    const children = await localExcludeListView.getChildren();
+    await vscode.commands.executeCommand(
+      "git-graph.deleteLocalExcludeEntry",
+      children[0],
+    );
+
+    expect(spyOnWriteFile).toHaveBeenCalled();
+  });
+
+  it("Should delete a disabled local exclude entry", async () => {
+    spyOnReadFile.mockImplementation(
+      (
+        _: string,
+        __: string,
+        callback: (err: NodeJS.ErrnoException | null, data: string) => void,
+      ) => {
+        callback(null, "node_modules\n# git-graph-disabled: dist/\n");
+      },
+    );
+    spyOnWriteFile.mockImplementation(
+      (
+        _: string,
+        contents: string,
+        __: string,
+        callback: (err: NodeJS.ErrnoException | null) => void,
+      ) => {
+        expect(contents).toBe("node_modules\n");
+        callback(null);
+      },
+    );
+
+    const children = await localExcludeListView.getChildren();
+    await vscode.commands.executeCommand(
+      "git-graph.deleteLocalExcludeEntry",
+      children[1],
+    );
+
+    expect(spyOnWriteFile).toHaveBeenCalled();
+  });
 });

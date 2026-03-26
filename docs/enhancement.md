@@ -123,7 +123,7 @@ Test output:
 
 ### Batch 5
 
-Status: In progress.
+Status: Finished.
 
 Scope:
 
@@ -137,17 +137,20 @@ Checklist:
 
 - [x] Add a collapsible side bar panel for local exclude entries.
 - [x] Read and parse `.git/info/exclude` into editable list items.
-- [ ] Add checkbox state for enable and disable behavior.
+- [x] Add checkbox state for enable and disable behavior.
 - [x] Add File Explorer context menu contribution for files and folders.
 - [x] Append selected file or folder paths to `.git/info/exclude`.
 - [x] Refresh the exclude panel after updates.
-- [ ] Package a unique VSIX for testing.
+- [x] Package a unique VSIX for testing.
 
 Test output:
 
 - Back-end compile is green.
 - Focused `localExcludeListView` tests are green.
-- Native tree-view checkboxes are still pending because the extension currently targets VS Code `^1.38.0`, which does not provide the checkbox API used by newer tree views.
+- Current packaged build: `git-graph-1.30.13.vsix`
+- Native tree-view checkboxes are implemented.
+- Extension engine target is now VS Code `^1.95.0` for the checkbox-enabled tree view API.
+- Direct `vsce` packing is still used for packaging because the normal prepublish flow remains blocked by existing repository-wide lint warnings.
 
 ### Batch 6
 
