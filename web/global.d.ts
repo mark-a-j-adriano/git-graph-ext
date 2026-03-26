@@ -1,4 +1,4 @@
-import * as GG from "../out/types"; // Import types from back-end (requires `npm run compile-src`)
+import * as GG from '../out/types'; // Import types from back-end (requires `npm run compile-src`)
 
 declare global {
   /* Visual Studio Code API Types */
@@ -47,6 +47,7 @@ declare global {
     readonly currentRepoLoading: boolean;
     readonly gitRepos: GG.GitRepoSet;
     readonly gitBranches: ReadonlyArray<string>;
+    readonly gitBranchInfos?: ReadonlyArray<GG.GitBranchInfo>;
     readonly gitBranchHead: string | null;
     readonly gitConfig: GG.GitRepoConfig | null;
     readonly gitRemotes: ReadonlyArray<string>;
@@ -56,6 +57,8 @@ declare global {
     readonly commitHead: string | null;
     readonly avatars: AvatarImageCollection;
     readonly currentBranches: string[] | null;
+    readonly branchCreationDateFilter?: string;
+    readonly branchUpdatedDateFilter?: string;
     readonly myCommitsOnly?: boolean;
     readonly moreCommitsAvailable: boolean;
     readonly maxCommits: number;
@@ -69,20 +72,20 @@ declare global {
   /* Commit Details / Comparison View File Tree Types */
 
   interface FileTreeFile {
-    readonly type: "file";
+    readonly type: 'file';
     readonly name: string;
     readonly index: number;
     reviewed: boolean;
   }
 
   interface FileTreeRepo {
-    readonly type: "repo";
+    readonly type: 'repo';
     readonly name: string;
     readonly path: string;
   }
 
   interface FileTreeFolder {
-    readonly type: "folder";
+    readonly type: 'folder';
     readonly name: string;
     readonly folderPath: string;
     readonly contents: FileTreeFolderContents;
@@ -97,10 +100,10 @@ declare global {
   /* Dialog & ContextMenu shared base Target interfaces */
 
   const enum TargetType {
-    Commit = "commit",
-    CommitDetailsView = "cdv",
-    Ref = "ref",
-    Repo = "repo",
+    Commit = 'commit',
+    CommitDetailsView = 'cdv',
+    Ref = 'ref',
+    Repo = 'repo',
   }
 
   interface CommitOrRefTarget {

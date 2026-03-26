@@ -29,6 +29,20 @@ export interface GitCommitStash {
   readonly untrackedFilesHash: string | null;
 }
 
+export interface GitBranchInfo {
+  readonly name: string;
+  readonly createdAt: number | null;
+  readonly updatedAt: number | null;
+  readonly isRemote: boolean;
+}
+
+export interface GitAuthorInfo {
+  readonly name: string;
+  readonly email: string;
+  readonly displayName: string;
+  readonly commitCount: number;
+}
+
 export interface GitCommitDetails {
   readonly hash: string;
   readonly parents: ReadonlyArray<string>;
@@ -44,13 +58,13 @@ export interface GitCommitDetails {
 }
 
 export const enum GitSignatureStatus {
-  GoodAndValid = "G",
-  GoodWithUnknownValidity = "U",
-  GoodButExpired = "X",
-  GoodButMadeByExpiredKey = "Y",
-  GoodButMadeByRevokedKey = "R",
-  CannotBeChecked = "E",
-  Bad = "B",
+  GoodAndValid = 'G',
+  GoodWithUnknownValidity = 'U',
+  GoodButExpired = 'X',
+  GoodButMadeByExpiredKey = 'Y',
+  GoodButMadeByRevokedKey = 'R',
+  CannotBeChecked = 'E',
+  Bad = 'B',
 }
 
 export interface GitSignature {
@@ -60,9 +74,9 @@ export interface GitSignature {
 }
 
 export const enum GitConfigLocation {
-  Local = "local",
-  Global = "global",
-  System = "system",
+  Local = 'local',
+  Global = 'global',
+  System = 'system',
 }
 
 export interface GitFileChange {
@@ -74,17 +88,17 @@ export interface GitFileChange {
 }
 
 export const enum GitFileStatus {
-  Added = "A",
-  Modified = "M",
-  Deleted = "D",
-  Renamed = "R",
-  Untracked = "U",
+  Added = 'A',
+  Modified = 'M',
+  Deleted = 'D',
+  Renamed = 'R',
+  Untracked = 'U',
 }
 
 export const enum GitPushBranchMode {
-  Normal = "",
-  Force = "force",
-  ForceWithLease = "force-with-lease",
+  Normal = '',
+  Force = 'force',
+  ForceWithLease = 'force-with-lease',
 }
 
 export interface GitRepoConfig {
@@ -121,9 +135,9 @@ export interface GitRepoSettingsRemote {
 }
 
 export const enum GitResetMode {
-  Soft = "soft",
-  Mixed = "mixed",
-  Hard = "hard",
+  Soft = 'soft',
+  Mixed = 'mixed',
+  Hard = 'hard',
 }
 
 export interface GitStash {
@@ -309,7 +323,7 @@ export type LoadGitGraphViewTo = {
     readonly commitHash: string;
     readonly compareWithHash: string | null;
   };
-  readonly runCommandOnLoad?: "fetch";
+  readonly runCommandOnLoad?: 'fetch';
 } | null;
 
 export interface MuteCommitsConfig {
@@ -343,9 +357,9 @@ export const enum CommitDetailsViewLocation {
 }
 
 export const enum CommitOrdering {
-  Date = "date",
-  AuthorDate = "author-date",
-  Topological = "topo",
+  Date = 'date',
+  AuthorDate = 'author-date',
+  Topological = 'topo',
 }
 
 export interface ContextMenuActionsVisibility {
@@ -538,10 +552,10 @@ export const enum RefLabelAlignment {
 }
 
 export const enum RepoCommitOrdering {
-  Default = "default",
-  Date = "date",
-  AuthorDate = "author-date",
-  Topological = "topo",
+  Default = 'default',
+  Date = 'date',
+  AuthorDate = 'author-date',
+  Topological = 'topo',
 }
 
 export const enum RepoDropdownOrder {
@@ -586,24 +600,24 @@ export interface ResponseWithMultiErrorInfo extends BaseMessage {
 export type ErrorInfo = string | null; // null => no error, otherwise => error message
 
 export const enum ErrorInfoExtensionPrefix {
-  PushTagCommitNotOnRemote = "VSCODE_GIT_GRAPH:PUSH_TAG:COMMIT_NOT_ON_REMOTE:",
+  PushTagCommitNotOnRemote = 'VSCODE_GIT_GRAPH:PUSH_TAG:COMMIT_NOT_ON_REMOTE:',
 }
 
 /* Request / Response Messages */
 
 export interface RequestAddRemote extends RepoRequest {
-  readonly command: "addRemote";
+  readonly command: 'addRemote';
   readonly name: string;
   readonly url: string;
   readonly pushUrl: string | null;
   readonly fetch: boolean;
 }
 export interface ResponseAddRemote extends ResponseWithErrorInfo {
-  readonly command: "addRemote";
+  readonly command: 'addRemote';
 }
 
 export interface RequestAddTag extends RepoRequest {
-  readonly command: "addTag";
+  readonly command: 'addTag';
   readonly commitHash: string;
   readonly tagName: string;
   readonly type: TagType;
@@ -613,7 +627,7 @@ export interface RequestAddTag extends RepoRequest {
   readonly force: boolean;
 }
 export interface ResponseAddTag extends ResponseWithMultiErrorInfo {
-  readonly command: "addTag";
+  readonly command: 'addTag';
   readonly repo: string;
   readonly tagName: string;
   readonly pushToRemote: string | null;
@@ -621,25 +635,25 @@ export interface ResponseAddTag extends ResponseWithMultiErrorInfo {
 }
 
 export interface RequestApplyStash extends RepoRequest {
-  readonly command: "applyStash";
+  readonly command: 'applyStash';
   readonly selector: string;
   readonly reinstateIndex: boolean;
 }
 export interface ResponseApplyStash extends ResponseWithErrorInfo {
-  readonly command: "applyStash";
+  readonly command: 'applyStash';
 }
 
 export interface RequestBranchFromStash extends RepoRequest {
-  readonly command: "branchFromStash";
+  readonly command: 'branchFromStash';
   readonly selector: string;
   readonly branchName: string;
 }
 export interface ResponseBranchFromStash extends ResponseWithErrorInfo {
-  readonly command: "branchFromStash";
+  readonly command: 'branchFromStash';
 }
 
 export interface RequestCheckoutBranch extends RepoRequest {
-  readonly command: "checkoutBranch";
+  readonly command: 'checkoutBranch';
   readonly branchName: string;
   readonly remoteBranch: string | null;
   readonly pullAfterwards: {
@@ -650,7 +664,7 @@ export interface RequestCheckoutBranch extends RepoRequest {
   } | null; // NULL => Don't pull after checking out
 }
 export interface ResponseCheckoutBranch extends ResponseWithMultiErrorInfo {
-  readonly command: "checkoutBranch";
+  readonly command: 'checkoutBranch';
   readonly pullAfterwards: {
     readonly branchName: string;
     readonly remote: string;
@@ -658,34 +672,34 @@ export interface ResponseCheckoutBranch extends ResponseWithMultiErrorInfo {
 }
 
 export interface RequestCheckoutCommit extends RepoRequest {
-  readonly command: "checkoutCommit";
+  readonly command: 'checkoutCommit';
   readonly commitHash: string;
 }
 export interface ResponseCheckoutCommit extends ResponseWithErrorInfo {
-  readonly command: "checkoutCommit";
+  readonly command: 'checkoutCommit';
 }
 
 export interface RequestCherrypickCommit extends RepoRequest {
-  readonly command: "cherrypickCommit";
+  readonly command: 'cherrypickCommit';
   readonly commitHash: string;
   readonly parentIndex: number;
   readonly recordOrigin: boolean;
   readonly noCommit: boolean;
 }
 export interface ResponseCherrypickCommit extends ResponseWithMultiErrorInfo {
-  readonly command: "cherrypickCommit";
+  readonly command: 'cherrypickCommit';
 }
 
 export interface RequestCleanUntrackedFiles extends RepoRequest {
-  readonly command: "cleanUntrackedFiles";
+  readonly command: 'cleanUntrackedFiles';
   readonly directories: boolean;
 }
 export interface ResponseCleanUntrackedFiles extends ResponseWithErrorInfo {
-  readonly command: "cleanUntrackedFiles";
+  readonly command: 'cleanUntrackedFiles';
 }
 
 export interface RequestCommitDetails extends RepoRequest {
-  readonly command: "commitDetails";
+  readonly command: 'commitDetails';
   readonly commitHash: string;
   readonly hasParents: boolean;
   readonly stash: GitCommitStash | null; // null => request is for a commit, otherwise => request is for a stash
@@ -693,7 +707,7 @@ export interface RequestCommitDetails extends RepoRequest {
   readonly refresh: boolean;
 }
 export interface ResponseCommitDetails extends ResponseWithErrorInfo {
-  readonly command: "commitDetails";
+  readonly command: 'commitDetails';
   readonly commitDetails: GitCommitDetails | null;
   readonly avatar: string | null;
   readonly codeReview: CodeReview | null;
@@ -701,7 +715,7 @@ export interface ResponseCommitDetails extends ResponseWithErrorInfo {
 }
 
 export interface RequestCompareCommits extends RepoRequest {
-  readonly command: "compareCommits";
+  readonly command: 'compareCommits';
   readonly commitHash: string;
   readonly compareWithHash: string;
   readonly fromHash: string;
@@ -709,7 +723,7 @@ export interface RequestCompareCommits extends RepoRequest {
   readonly refresh: boolean;
 }
 export interface ResponseCompareCommits extends ResponseWithErrorInfo {
-  readonly command: "compareCommits";
+  readonly command: 'compareCommits';
   readonly commitHash: string;
   readonly compareWithHash: string;
   readonly fileChanges: ReadonlyArray<GitFileChange>;
@@ -718,45 +732,45 @@ export interface ResponseCompareCommits extends ResponseWithErrorInfo {
 }
 
 export interface RequestCopyFilePath extends RepoRequest {
-  readonly command: "copyFilePath";
+  readonly command: 'copyFilePath';
   readonly filePath: string;
   readonly absolute: boolean;
 }
 export interface ResponseCopyFilePath extends ResponseWithErrorInfo {
-  readonly command: "copyFilePath";
+  readonly command: 'copyFilePath';
 }
 
 export interface RequestCopyToClipboard extends BaseMessage {
-  readonly command: "copyToClipboard";
+  readonly command: 'copyToClipboard';
   readonly type: string;
   readonly data: string;
 }
 export interface ResponseCopyToClipboard extends ResponseWithErrorInfo {
-  readonly command: "copyToClipboard";
+  readonly command: 'copyToClipboard';
   readonly type: string;
 }
 
 export interface RequestCreateArchive extends RepoRequest {
-  readonly command: "createArchive";
+  readonly command: 'createArchive';
   readonly ref: string;
 }
 export interface ResponseCreateArchive extends ResponseWithErrorInfo {
-  readonly command: "createArchive";
+  readonly command: 'createArchive';
 }
 
 export interface RequestCreateBranch extends RepoRequest {
-  readonly command: "createBranch";
+  readonly command: 'createBranch';
   readonly commitHash: string;
   readonly branchName: string;
   readonly checkout: boolean;
   readonly force: boolean;
 }
 export interface ResponseCreateBranch extends ResponseWithMultiErrorInfo {
-  readonly command: "createBranch";
+  readonly command: 'createBranch';
 }
 
 export interface RequestCreatePullRequest extends RepoRequest {
-  readonly command: "createPullRequest";
+  readonly command: 'createPullRequest';
   readonly config: PullRequestConfig;
   readonly sourceRemote: string;
   readonly sourceOwner: string;
@@ -765,77 +779,77 @@ export interface RequestCreatePullRequest extends RepoRequest {
   readonly push: boolean;
 }
 export interface ResponseCreatePullRequest extends ResponseWithMultiErrorInfo {
-  readonly command: "createPullRequest";
+  readonly command: 'createPullRequest';
   readonly push: boolean;
 }
 
 export interface RequestDeleteBranch extends RepoRequest {
-  readonly command: "deleteBranch";
+  readonly command: 'deleteBranch';
   readonly branchName: string;
   readonly forceDelete: boolean;
   readonly deleteOnRemotes: ReadonlyArray<string>;
 }
 export interface ResponseDeleteBranch extends ResponseWithMultiErrorInfo {
-  readonly command: "deleteBranch";
+  readonly command: 'deleteBranch';
   readonly repo: string;
   readonly branchName: string;
   readonly deleteOnRemotes: ReadonlyArray<string>;
 }
 
 export interface RequestDeleteRemote extends RepoRequest {
-  readonly command: "deleteRemote";
+  readonly command: 'deleteRemote';
   readonly name: string;
 }
 export interface ResponseDeleteRemote extends ResponseWithErrorInfo {
-  readonly command: "deleteRemote";
+  readonly command: 'deleteRemote';
 }
 
 export interface RequestDeleteRemoteBranch extends RepoRequest {
-  readonly command: "deleteRemoteBranch";
+  readonly command: 'deleteRemoteBranch';
   readonly branchName: string;
   readonly remote: string;
 }
 export interface ResponseDeleteRemoteBranch extends ResponseWithErrorInfo {
-  readonly command: "deleteRemoteBranch";
+  readonly command: 'deleteRemoteBranch';
 }
 
 export interface RequestDeleteTag extends RepoRequest {
-  readonly command: "deleteTag";
+  readonly command: 'deleteTag';
   readonly tagName: string;
   readonly deleteOnRemote: string | null; // null => don't delete on remote, otherwise => remote to delete on
 }
 export interface ResponseDeleteTag extends ResponseWithErrorInfo {
-  readonly command: "deleteTag";
+  readonly command: 'deleteTag';
 }
 
 export interface RequestDeleteUserDetails extends RepoRequest {
-  readonly command: "deleteUserDetails";
+  readonly command: 'deleteUserDetails';
   readonly name: boolean; // TRUE => Delete Name, FALSE => Don't Delete Name
   readonly email: boolean; // TRUE => Delete Email, FALSE => Don't Delete Email
   readonly location: GitConfigLocation.Global | GitConfigLocation.Local;
 }
 export interface ResponseDeleteUserDetails extends ResponseWithMultiErrorInfo {
-  readonly command: "deleteUserDetails";
+  readonly command: 'deleteUserDetails';
 }
 
 export interface RequestDropCommit extends RepoRequest {
-  readonly command: "dropCommit";
+  readonly command: 'dropCommit';
   readonly commitHash: string;
 }
 export interface ResponseDropCommit extends ResponseWithErrorInfo {
-  readonly command: "dropCommit";
+  readonly command: 'dropCommit';
 }
 
 export interface RequestDropStash extends RepoRequest {
-  readonly command: "dropStash";
+  readonly command: 'dropStash';
   readonly selector: string;
 }
 export interface ResponseDropStash extends ResponseWithErrorInfo {
-  readonly command: "dropStash";
+  readonly command: 'dropStash';
 }
 
 export interface RequestEditRemote extends RepoRequest {
-  readonly command: "editRemote";
+  readonly command: 'editRemote';
   readonly nameOld: string;
   readonly nameNew: string;
   readonly urlOld: string | null;
@@ -844,11 +858,11 @@ export interface RequestEditRemote extends RepoRequest {
   readonly pushUrlNew: string | null;
 }
 export interface ResponseEditRemote extends ResponseWithErrorInfo {
-  readonly command: "editRemote";
+  readonly command: 'editRemote';
 }
 
 export interface RequestEditUserDetails extends RepoRequest {
-  readonly command: "editUserDetails";
+  readonly command: 'editUserDetails';
   readonly name: string;
   readonly email: string;
   readonly location: GitConfigLocation.Global | GitConfigLocation.Local;
@@ -856,56 +870,56 @@ export interface RequestEditUserDetails extends RepoRequest {
   readonly deleteLocalEmail: boolean; // TRUE => Delete Local Email, FALSE => Don't Delete Local Email
 }
 export interface ResponseEditUserDetails extends ResponseWithMultiErrorInfo {
-  readonly command: "editUserDetails";
+  readonly command: 'editUserDetails';
 }
 
 export interface RequestEndCodeReview extends RepoRequest {
-  readonly command: "endCodeReview";
+  readonly command: 'endCodeReview';
   readonly id: string;
 }
 
 export interface RequestExportRepoConfig extends RepoRequest {
-  readonly command: "exportRepoConfig";
+  readonly command: 'exportRepoConfig';
 }
 export interface ResponseExportRepoConfig extends ResponseWithErrorInfo {
-  readonly command: "exportRepoConfig";
+  readonly command: 'exportRepoConfig';
 }
 
 export interface RequestFetch extends RepoRequest {
-  readonly command: "fetch";
+  readonly command: 'fetch';
   readonly name: string | null; // null => Fetch all remotes
   readonly prune: boolean;
   readonly pruneTags: boolean;
 }
 export interface ResponseFetch extends ResponseWithErrorInfo {
-  readonly command: "fetch";
+  readonly command: 'fetch';
 }
 
 export interface RequestFetchAvatar extends RepoRequest {
-  readonly command: "fetchAvatar";
+  readonly command: 'fetchAvatar';
   readonly remote: string | null;
   readonly email: string;
   readonly commits: string[];
 }
 export interface ResponseFetchAvatar extends BaseMessage {
-  readonly command: "fetchAvatar";
+  readonly command: 'fetchAvatar';
   readonly email: string;
   readonly image: string;
 }
 
 export interface RequestFetchIntoLocalBranch extends RepoRequest {
-  readonly command: "fetchIntoLocalBranch";
+  readonly command: 'fetchIntoLocalBranch';
   readonly remote: string;
   readonly remoteBranch: string;
   readonly localBranch: string;
   readonly force: boolean;
 }
 export interface ResponseFetchIntoLocalBranch extends ResponseWithErrorInfo {
-  readonly command: "fetchIntoLocalBranch";
+  readonly command: 'fetchIntoLocalBranch';
 }
 
 export interface RequestLoadCommits extends RepoRequest {
-  readonly command: "loadCommits";
+  readonly command: 'loadCommits';
   readonly refreshId: number;
   readonly branches: ReadonlyArray<string> | null; // null => Show All
   readonly author?: string | null;
@@ -920,7 +934,7 @@ export interface RequestLoadCommits extends RepoRequest {
   readonly stashes: ReadonlyArray<GitStash>;
 }
 export interface ResponseLoadCommits extends ResponseWithErrorInfo {
-  readonly command: "loadCommits";
+  readonly command: 'loadCommits';
   readonly refreshId: number;
   readonly commits: GitCommit[];
   readonly head: string | null;
@@ -930,26 +944,28 @@ export interface ResponseLoadCommits extends ResponseWithErrorInfo {
 }
 
 export interface RequestLoadConfig extends RepoRequest {
-  readonly command: "loadConfig";
+  readonly command: 'loadConfig';
   readonly remotes: ReadonlyArray<string>;
 }
 export interface ResponseLoadConfig extends ResponseWithErrorInfo {
-  readonly command: "loadConfig";
+  readonly command: 'loadConfig';
   readonly repo: string;
   readonly config: GitRepoConfig | null;
 }
 
 export interface RequestLoadRepoInfo extends RepoRequest {
-  readonly command: "loadRepoInfo";
+  readonly command: 'loadRepoInfo';
   readonly refreshId: number;
   readonly showRemoteBranches: boolean;
   readonly showStashes: boolean;
   readonly hideRemotes: ReadonlyArray<string>;
 }
 export interface ResponseLoadRepoInfo extends ResponseWithErrorInfo {
-  readonly command: "loadRepoInfo";
+  readonly command: 'loadRepoInfo';
   readonly refreshId: number;
   readonly branches: ReadonlyArray<string>;
+  readonly branchInfos: ReadonlyArray<GitBranchInfo>;
+  readonly authors: ReadonlyArray<GitAuthorInfo>;
   readonly head: string | null;
   readonly remotes: ReadonlyArray<string>;
   readonly stashes: ReadonlyArray<GitStash>;
@@ -957,23 +973,23 @@ export interface ResponseLoadRepoInfo extends ResponseWithErrorInfo {
 }
 
 export interface RequestLoadRepos extends BaseMessage {
-  readonly command: "loadRepos";
+  readonly command: 'loadRepos';
   readonly check: boolean;
 }
 export interface ResponseLoadRepos extends BaseMessage {
-  readonly command: "loadRepos";
+  readonly command: 'loadRepos';
   readonly repos: GitRepoSet;
   readonly lastActiveRepo: string | null;
   readonly loadViewTo: LoadGitGraphViewTo;
 }
 
 export const enum MergeActionOn {
-  Branch = "Branch",
-  RemoteTrackingBranch = "Remote-tracking Branch",
-  Commit = "Commit",
+  Branch = 'Branch',
+  RemoteTrackingBranch = 'Remote-tracking Branch',
+  Commit = 'Commit',
 }
 export interface RequestMerge extends RepoRequest {
-  readonly command: "merge";
+  readonly command: 'merge';
   readonly obj: string;
   readonly actionOn: MergeActionOn;
   readonly createNewCommit: boolean;
@@ -981,82 +997,82 @@ export interface RequestMerge extends RepoRequest {
   readonly noCommit: boolean;
 }
 export interface ResponseMerge extends ResponseWithErrorInfo {
-  readonly command: "merge";
+  readonly command: 'merge';
   readonly actionOn: MergeActionOn;
 }
 
 export interface RequestOpenExtensionSettings extends BaseMessage {
-  readonly command: "openExtensionSettings";
+  readonly command: 'openExtensionSettings';
 }
 export interface ResponseOpenExtensionSettings extends ResponseWithErrorInfo {
-  readonly command: "openExtensionSettings";
+  readonly command: 'openExtensionSettings';
 }
 
 export interface RequestOpenExternalDirDiff extends RepoRequest {
-  readonly command: "openExternalDirDiff";
+  readonly command: 'openExternalDirDiff';
   readonly fromHash: string;
   readonly toHash: string;
   readonly isGui: boolean;
 }
 export interface ResponseOpenExternalDirDiff extends ResponseWithErrorInfo {
-  readonly command: "openExternalDirDiff";
+  readonly command: 'openExternalDirDiff';
 }
 
 export interface RequestOpenExternalUrl extends BaseMessage {
-  readonly command: "openExternalUrl";
+  readonly command: 'openExternalUrl';
   readonly url: string;
 }
 export interface ResponseOpenExternalUrl extends ResponseWithErrorInfo {
-  readonly command: "openExternalUrl";
+  readonly command: 'openExternalUrl';
 }
 
 export interface RequestOpenFile extends RepoRequest {
-  readonly command: "openFile";
+  readonly command: 'openFile';
   readonly hash: string;
   readonly filePath: string;
 }
 export interface ResponseOpenFile extends ResponseWithErrorInfo {
-  readonly command: "openFile";
+  readonly command: 'openFile';
 }
 
 export interface RequestOpenTerminal extends RepoRequest {
-  readonly command: "openTerminal";
+  readonly command: 'openTerminal';
   readonly name: string;
 }
 export interface ResponseOpenTerminal extends ResponseWithErrorInfo {
-  readonly command: "openTerminal";
+  readonly command: 'openTerminal';
 }
 
 export interface RequestPopStash extends RepoRequest {
-  readonly command: "popStash";
+  readonly command: 'popStash';
   readonly selector: string;
   readonly reinstateIndex: boolean;
 }
 export interface ResponsePopStash extends ResponseWithErrorInfo {
-  readonly command: "popStash";
+  readonly command: 'popStash';
 }
 
 export interface RequestPruneRemote extends RepoRequest {
-  readonly command: "pruneRemote";
+  readonly command: 'pruneRemote';
   readonly name: string;
 }
 export interface ResponsePruneRemote extends ResponseWithErrorInfo {
-  readonly command: "pruneRemote";
+  readonly command: 'pruneRemote';
 }
 
 export interface RequestPullBranch extends RepoRequest {
-  readonly command: "pullBranch";
+  readonly command: 'pullBranch';
   readonly branchName: string;
   readonly remote: string;
   readonly createNewCommit: boolean;
   readonly squash: boolean;
 }
 export interface ResponsePullBranch extends ResponseWithErrorInfo {
-  readonly command: "pullBranch";
+  readonly command: 'pullBranch';
 }
 
 export interface RequestPushBranch extends RepoRequest {
-  readonly command: "pushBranch";
+  readonly command: 'pushBranch';
   readonly branchName: string;
   readonly remotes: string[];
   readonly setUpstream: boolean;
@@ -1064,28 +1080,28 @@ export interface RequestPushBranch extends RepoRequest {
   readonly willUpdateBranchConfig: boolean;
 }
 export interface ResponsePushBranch extends ResponseWithMultiErrorInfo {
-  readonly command: "pushBranch";
+  readonly command: 'pushBranch';
   readonly willUpdateBranchConfig: boolean;
 }
 
 export interface RequestPushStash extends RepoRequest {
-  readonly command: "pushStash";
+  readonly command: 'pushStash';
   readonly message: string;
   readonly includeUntracked: boolean;
 }
 export interface ResponsePushStash extends ResponseWithErrorInfo {
-  readonly command: "pushStash";
+  readonly command: 'pushStash';
 }
 
 export interface RequestPushTag extends RepoRequest {
-  readonly command: "pushTag";
+  readonly command: 'pushTag';
   readonly tagName: string;
   readonly remotes: string[];
   readonly commitHash: string;
   readonly skipRemoteCheck: boolean;
 }
 export interface ResponsePushTag extends ResponseWithMultiErrorInfo {
-  readonly command: "pushTag";
+  readonly command: 'pushTag';
   readonly repo: string;
   readonly tagName: string;
   readonly remotes: string[];
@@ -1093,94 +1109,94 @@ export interface ResponsePushTag extends ResponseWithMultiErrorInfo {
 }
 
 export const enum RebaseActionOn {
-  Branch = "Branch",
-  Commit = "Commit",
+  Branch = 'Branch',
+  Commit = 'Commit',
 }
 export interface RequestRebase extends RepoRequest {
-  readonly command: "rebase";
+  readonly command: 'rebase';
   readonly obj: string;
   readonly actionOn: RebaseActionOn;
   readonly ignoreDate: boolean;
   readonly interactive: boolean;
 }
 export interface ResponseRebase extends ResponseWithErrorInfo {
-  readonly command: "rebase";
+  readonly command: 'rebase';
   readonly actionOn: RebaseActionOn;
   readonly interactive: boolean;
 }
 
 export interface ResponseRefresh extends BaseMessage {
-  readonly command: "refresh";
+  readonly command: 'refresh';
 }
 
 export interface RequestRenameBranch extends RepoRequest {
-  readonly command: "renameBranch";
+  readonly command: 'renameBranch';
   readonly oldName: string;
   readonly newName: string;
 }
 export interface ResponseRenameBranch extends ResponseWithErrorInfo {
-  readonly command: "renameBranch";
+  readonly command: 'renameBranch';
 }
 
 export interface RequestRescanForRepos extends BaseMessage {
-  readonly command: "rescanForRepos";
+  readonly command: 'rescanForRepos';
 }
 
 export interface RequestResetFileToRevision extends RepoRequest {
-  readonly command: "resetFileToRevision";
+  readonly command: 'resetFileToRevision';
   readonly commitHash: string;
   readonly filePath: string;
 }
 export interface ResponseResetFileToRevision extends ResponseWithErrorInfo {
-  readonly command: "resetFileToRevision";
+  readonly command: 'resetFileToRevision';
 }
 
 export interface RequestResetToCommit extends RepoRequest {
-  readonly command: "resetToCommit";
+  readonly command: 'resetToCommit';
   readonly commit: string;
   readonly resetMode: GitResetMode;
 }
 export interface ResponseResetToCommit extends ResponseWithErrorInfo {
-  readonly command: "resetToCommit";
+  readonly command: 'resetToCommit';
 }
 
 export interface RequestRevertCommit extends RepoRequest {
-  readonly command: "revertCommit";
+  readonly command: 'revertCommit';
   readonly commitHash: string;
   readonly parentIndex: number;
 }
 export interface ResponseRevertCommit extends ResponseWithErrorInfo {
-  readonly command: "revertCommit";
+  readonly command: 'revertCommit';
 }
 
 export interface RequestSetGlobalViewState extends BaseMessage {
-  readonly command: "setGlobalViewState";
+  readonly command: 'setGlobalViewState';
   readonly state: GitGraphViewGlobalState;
 }
 export interface ResponseSetGlobalViewState extends ResponseWithErrorInfo {
-  readonly command: "setGlobalViewState";
+  readonly command: 'setGlobalViewState';
 }
 
 export interface RequestSetRepoState extends RepoRequest {
-  readonly command: "setRepoState";
+  readonly command: 'setRepoState';
   readonly state: GitRepoState;
 }
 
 export interface RequestSetWorkspaceViewState extends BaseMessage {
-  readonly command: "setWorkspaceViewState";
+  readonly command: 'setWorkspaceViewState';
   readonly state: GitGraphViewWorkspaceState;
 }
 export interface ResponseSetWorkspaceViewState extends ResponseWithErrorInfo {
-  readonly command: "setWorkspaceViewState";
+  readonly command: 'setWorkspaceViewState';
 }
 
 export interface RequestShowErrorDialog extends BaseMessage {
-  readonly command: "showErrorMessage";
+  readonly command: 'showErrorMessage';
   readonly message: string;
 }
 
 export interface RequestStartCodeReview extends RepoRequest {
-  readonly command: "startCodeReview";
+  readonly command: 'startCodeReview';
   readonly id: string;
   readonly files: string[];
   readonly lastViewedFile: string | null;
@@ -1188,37 +1204,37 @@ export interface RequestStartCodeReview extends RepoRequest {
   readonly compareWithHash: string | null;
 }
 export interface ResponseStartCodeReview extends ResponseWithErrorInfo {
-  readonly command: "startCodeReview";
+  readonly command: 'startCodeReview';
   readonly codeReview: CodeReview;
   readonly commitHash: string;
   readonly compareWithHash: string | null;
 }
 
 export interface RequestTagDetails extends RepoRequest {
-  readonly command: "tagDetails";
+  readonly command: 'tagDetails';
   readonly tagName: string;
   readonly commitHash: string;
 }
 export interface ResponseTagDetails extends ResponseWithErrorInfo {
-  readonly command: "tagDetails";
+  readonly command: 'tagDetails';
   readonly tagName: string;
   readonly commitHash: string;
   readonly details: GitTagDetails | null;
 }
 
 export interface RequestUpdateCodeReview extends RepoRequest {
-  readonly command: "updateCodeReview";
+  readonly command: 'updateCodeReview';
   readonly id: string;
   readonly remainingFiles: string[];
   readonly lastViewedFile: string | null;
 }
 
 export interface ResponseUpdateCodeReview extends ResponseWithErrorInfo {
-  readonly command: "updateCodeReview";
+  readonly command: 'updateCodeReview';
 }
 
 export interface RequestViewDiff extends RepoRequest {
-  readonly command: "viewDiff";
+  readonly command: 'viewDiff';
   readonly fromHash: string;
   readonly toHash: string;
   readonly oldFilePath: string;
@@ -1226,32 +1242,32 @@ export interface RequestViewDiff extends RepoRequest {
   readonly type: GitFileStatus;
 }
 export interface ResponseViewDiff extends ResponseWithErrorInfo {
-  readonly command: "viewDiff";
+  readonly command: 'viewDiff';
 }
 
 export interface RequestViewDiffWithWorkingFile extends RepoRequest {
-  readonly command: "viewDiffWithWorkingFile";
+  readonly command: 'viewDiffWithWorkingFile';
   readonly hash: string;
   readonly filePath: string;
 }
 export interface ResponseViewDiffWithWorkingFile extends ResponseWithErrorInfo {
-  readonly command: "viewDiffWithWorkingFile";
+  readonly command: 'viewDiffWithWorkingFile';
 }
 
 export interface RequestViewFileAtRevision extends RepoRequest {
-  readonly command: "viewFileAtRevision";
+  readonly command: 'viewFileAtRevision';
   readonly hash: string;
   readonly filePath: string;
 }
 export interface ResponseViewFileAtRevision extends ResponseWithErrorInfo {
-  readonly command: "viewFileAtRevision";
+  readonly command: 'viewFileAtRevision';
 }
 
 export interface RequestViewScm extends BaseMessage {
-  readonly command: "viewScm";
+  readonly command: 'viewScm';
 }
 export interface ResponseViewScm extends ResponseWithErrorInfo {
-  readonly command: "viewScm";
+  readonly command: 'viewScm';
 }
 
 export type RequestMessage =

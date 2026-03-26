@@ -28,6 +28,63 @@ Everything else is optional and should be treated as later work.
 - Prefer explicit prompts before any write/delete action.
 - Favor predictable UX over cleverness.
 
+## Delivery Rules
+
+- Ship work in small, user-testable batches.
+- Every batch must include a version bump before packaging.
+- Each packaged VSIX must have a unique version so test installs can be isolated from earlier batches.
+- Do not reuse the same extension version across multiple test batches.
+
+## Current Batch Plan
+
+This is the visible delivery plan for the Git Graph enhancement work so batches can be tracked in the repository, not only in chat state.
+
+### Batch 1
+
+Status: Finished.
+
+Scope:
+
+- Add explicit author filtering.
+- Add branch creation date filtering.
+- Package a unique VSIX version for isolated testing.
+
+Test output:
+
+- Current packaged build: `git-graph-1.30.5.vsix`
+- Compile is green.
+- Full automated test suite still needs follow-up updates for changed contracts.
+
+### Batch 2
+
+Status: Planned.
+
+Scope:
+
+- Add worktree actions to the Git Graph right-click menu.
+- Place the worktree actions as a separate group near existing commit copy actions.
+- Bump the extension version before packaging the batch.
+
+### Batch 3
+
+Status: Planned.
+
+Scope:
+
+- Add optional VS Code customizations when opening a newly created worktree.
+- Allow the new worktree flow to apply workspace-specific customizations during open.
+- Bump the extension version before packaging the batch.
+
+### Batch 4
+
+Status: Planned.
+
+Scope:
+
+- When a branch is created from another branch using the right-click menu options, and the source branch is not `main`, create a backup copy of the original branch first.
+- Name the backup branch with the `mmddyyyyhhmm`date prefix format.
+- Bump the extension version before packaging the batch.
+
 ---
 
 ## Scope for MVP

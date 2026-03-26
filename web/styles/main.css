@@ -884,6 +884,8 @@ body.tagLabelsRightAligned .gitRef.tag {
 
 #repoControl,
 #branchControl,
+#branchCreationDateControl,
+#branchUpdatedDateControl,
 #myCommitsControl,
 #showRemoteBranchesControl {
   display: inline-block;
@@ -893,6 +895,15 @@ body.tagLabelsRightAligned .gitRef.tag {
 #repoDropdown,
 #branchDropdown {
   margin-left: 3px;
+}
+#branchCreationDateDropdown,
+#branchUpdatedDateDropdown {
+  width: 72px;
+  margin-left: 3px;
+  padding: 1px 4px;
+  color: var(--vscode-input-foreground);
+  background-color: var(--vscode-input-background);
+  border: 1px solid var(--vscode-input-border);
 }
 #myCommitsControl > .customCheckbox,
 #showRemoteBranchesControl > .customCheckbox {
