@@ -252,6 +252,13 @@ export class RepoManager extends Disposable {
    * Refresh configuration for known repositories during startup.
    */
   private refreshKnownRepoConfigAtStartup() {
+    if (!this.shouldRefreshKnownRepoConfigAtStartup()) {
+      this.logger.log(
+        "Skipped checking known repos for config changes during startup",
+      );
+      return;
+    }
+
     this.checkReposForNewConfig();
   }
 
@@ -259,6 +266,13 @@ export class RepoManager extends Disposable {
    * Refresh submodule discovery for known repositories during startup.
    */
   private refreshKnownSubmodulesAtStartup() {
+    if (!this.shouldRefreshKnownSubmodulesAtStartup()) {
+      this.logger.log(
+        "Skipped checking known repos for new submodules during startup",
+      );
+      return Promise.resolve(false);
+    }
+
     return this.checkReposForNewSubmodules();
   }
 
@@ -272,10 +286,12 @@ export class RepoManager extends Disposable {
 
   /**
    * Refresh the current set of known repositories without scanning the workspace for new repositories.
+   * @returns TRUE => Known repositories changed, FALSE => No known repositories changed.
    */
   public async refreshKnownRepos() {
-    await this.ensureKnownReposStillExist();
-    await this.refreshKnownSubmodulesAtStartup();
+    const reposChanged = await this.ensureKnownReposStillExist();
+    const submodulesChanged = await this.refreshKnownSubmodulesAtStartup();
+    return reposChanged || submodulesChanged;
   }
 
   /**
@@ -296,6 +312,20 @@ export class RepoManager extends Disposable {
    * Determine if workspace discovery should run during startup.
    */
   private shouldDiscoverWorkspaceReposAtStartup() {
+    return !this.lazyStartupRepoDiscovery || !this.hasKnownRepos();
+  }
+
+  /**
+   * Determine if known repositories should be checked for config changes during startup.
+   */
+  private shouldRefreshKnownRepoConfigAtStartup() {
+    return !this.lazyStartupRepoDiscovery || !this.hasKnownRepos();
+  }
+
+  /**
+   * Determine if known repositories should be checked for new submodules during startup.
+   */
+  private shouldRefreshKnownSubmodulesAtStartup() {
     return !this.lazyStartupRepoDiscovery || !this.hasKnownRepos();
   }
 
@@ -824,6 +854,7 @@ export class RepoManager extends Disposable {
       if (await this.searchRepoForSubmodules(repoPaths[i])) changes = true;
     }
     if (changes) this.sendRepos();
+    return changes;
   }
 
   /**

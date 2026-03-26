@@ -784,8 +784,8 @@ export class GitGraphView extends Disposable {
         }
         break;
       case "loadRepos":
-        if (!msg.check || !(await this.repoManager.checkReposExist())) {
-          // If not required to check repos, or no changes were found when checking, respond with repos
+        if (!msg.check || !(await this.repoManager.refreshKnownRepos())) {
+          // If not required to refresh repos, or no changes were found when refreshing, respond with repos
           this.respondLoadRepos(this.repoManager.getRepos(), null);
         }
         break;

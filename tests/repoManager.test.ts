@@ -576,6 +576,8 @@ describe("RepoManager", () => {
       mockRepositoryWithNoSubmodules(); // Exists: /path/to/workspace-folder1/repo1
       mockDirectoryThatsNotRepository(); // Removed: Re/path/to/workspace-folder1/repo2
       mockRepositoryWithNoSubmodules(); // Exists: /path/to/another
+      spyOnReadFile.mockClear();
+      spyOnGetSubmodules.mockClear();
 
       // Run
       const repoManager = await constructRepoManagerAndWaitUntilStarted(
@@ -611,6 +613,14 @@ describe("RepoManager", () => {
       expect(spyOnLog).toHaveBeenCalledWith(
         "Skipped searching workspace for new repos during startup",
       );
+      expect(spyOnLog).toHaveBeenCalledWith(
+        "Skipped checking known repos for config changes during startup",
+      );
+      expect(spyOnLog).toHaveBeenCalledWith(
+        "Skipped checking known repos for new submodules during startup",
+      );
+      expect(spyOnReadFile).not.toHaveBeenCalled();
+      expect(spyOnGetSubmodules).not.toHaveBeenCalled();
       expect(vscode.workspace.createFileSystemWatcher).not.toHaveBeenCalledWith(
         "/path/to/workspace-folder1/**",
       );

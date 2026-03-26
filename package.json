@@ -1,13 +1,13 @@
 {
   "name": "git-graph",
-  "displayName": "Git Graph",
-  "version": "1.30.15",
-  "publisher": "mhutchie",
+  "displayName": "GitGraph V2",
+  "version": "1.30.17",
+  "publisher": "mark-a-j-adriano",
   "author": {
-    "name": "Michael Hutchison",
-    "email": "mhutchie@16right.com"
+    "name": "mark.a.j.adriano",
+    "email": "mark.adriano@airnz.co.nz"
   },
-  "description": "View a Git Graph of your repository, and perform Git actions from the graph.",
+  "description": "GitGraph V2 delivers a lower-overhead Git graph experience with explicit on-demand repository refresh flows.",
   "keywords": [
     "git",
     "graph",
@@ -27,7 +27,7 @@
     "url": "https://github.com/mhutchie/vscode-git-graph/issues"
   },
   "qna": "https://github.com/mhutchie/vscode-git-graph/wiki/Support-Resources",
-  "license": "SEE LICENSE IN 'LICENSE'",
+  "license": "SEE LICENSE IN LICENSE-DISTRIBUTION.md",
   "icon": "resources/icon.png",
   "engines": {
     "vscode": "^1.95.0"
@@ -36,7 +36,7 @@
     "workspace"
   ],
   "activationEvents": [
-    "*"
+    "onStartupFinished"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -152,13 +152,15 @@
       "explorer": [
         {
           "id": "git-graph.favoriteFolders",
-          "name": "Favorites"
+          "name": "Favorites",
+          "icon": "resources/icon.png"
         }
       ],
       "scm": [
         {
           "id": "git-graph.localExcludeList",
-          "name": "Local Exclude List"
+          "name": "Local Exclude List",
+          "icon": "resources/icon.png"
         }
       ]
     },

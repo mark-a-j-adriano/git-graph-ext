@@ -3547,7 +3547,10 @@ describe("GitGraphView", () => {
     describe("loadRepos", () => {
       it("Should load the repositories (without checking for new repositories)", async () => {
         // Setup
-        const spyOnCheckReposExist = jest.spyOn(repoManager, "checkReposExist");
+        const spyOnRefreshKnownRepos = jest.spyOn(
+          repoManager,
+          "refreshKnownRepos",
+        );
 
         // Run
         onDidReceiveMessage({
@@ -3557,7 +3560,7 @@ describe("GitGraphView", () => {
 
         // Assert
         await waitForExpect(() => {
-          expect(spyOnCheckReposExist).not.toHaveBeenCalled();
+          expect(spyOnRefreshKnownRepos).not.toHaveBeenCalled();
           expect(messages).toStrictEqual([
             {
               command: "loadRepos",
@@ -3571,8 +3574,11 @@ describe("GitGraphView", () => {
 
       it("Should load the repositories (found one new repository)", async () => {
         // Setup
-        const spyOnCheckReposExist = jest.spyOn(repoManager, "checkReposExist");
-        spyOnCheckReposExist.mockResolvedValueOnce(true);
+        const spyOnRefreshKnownRepos = jest.spyOn(
+          repoManager,
+          "refreshKnownRepos",
+        );
+        spyOnRefreshKnownRepos.mockResolvedValueOnce(true);
 
         // Run
         onDidReceiveMessage({
@@ -3582,15 +3588,18 @@ describe("GitGraphView", () => {
 
         // Assert
         await waitForExpect(() => {
-          expect(spyOnCheckReposExist).toHaveBeenCalledWith();
+          expect(spyOnRefreshKnownRepos).toHaveBeenCalledWith();
           expect(messages).toHaveLength(0);
         });
       });
 
       it("Should load the repositories (no new repositories)", async () => {
         // Setup
-        const spyOnCheckReposExist = jest.spyOn(repoManager, "checkReposExist");
-        spyOnCheckReposExist.mockResolvedValueOnce(false);
+        const spyOnRefreshKnownRepos = jest.spyOn(
+          repoManager,
+          "refreshKnownRepos",
+        );
+        spyOnRefreshKnownRepos.mockResolvedValueOnce(false);
 
         // Run
         onDidReceiveMessage({
@@ -3600,7 +3609,7 @@ describe("GitGraphView", () => {
 
         // Assert
         await waitForExpect(() => {
-          expect(spyOnCheckReposExist).toHaveBeenCalledWith();
+          expect(spyOnRefreshKnownRepos).toHaveBeenCalledWith();
           expect(messages).toStrictEqual([
             {
               command: "loadRepos",
