@@ -54,6 +54,7 @@ export class RepoManager extends Disposable {
   private readonly dataSource: DataSource;
   private readonly extensionState: ExtensionState;
   private readonly logger: Logger;
+  private readonly lazyStartupRepoDiscovery: boolean;
 
   private repos: GitRepoSet;
   private ignoredRepos: string[];
@@ -84,11 +85,13 @@ export class RepoManager extends Disposable {
     extensionState: ExtensionState,
     onDidChangeConfiguration: Event<vscode.ConfigurationChangeEvent>,
     logger: Logger,
+    lazyStartupRepoDiscovery: boolean = true,
   ) {
     super();
     this.dataSource = dataSource;
     this.extensionState = extensionState;
     this.logger = logger;
+    this.lazyStartupRepoDiscovery = lazyStartupRepoDiscovery;
     this.repos = extensionState.getRepos();
     this.ignoredRepos = extensionState.getIgnoredRepos();
     this.maxDepthOfRepoSearch = getConfig().maxDepthOfRepoSearch;
@@ -214,17 +217,106 @@ export class RepoManager extends Disposable {
    * Run various startup tasks when Git Graph is activated.
    */
   private async startupTasks() {
+    this.restoreKnownReposForWorkspace();
+    if (!(await this.ensureKnownReposStillExist())) {
+      // On startup, ensure that sendRepo is called (even if no changes were made)
+      this.sendRepos();
+    }
+    this.refreshKnownRepoConfigAtStartup();
+    await this.refreshKnownSubmodulesAtStartup();
+    await this.discoverWorkspaceReposAtStartup();
+    if (this.shouldStartWorkspaceFolderWatchers()) {
+      this.startWorkspaceFolderWatchersAtStartup();
+    }
+  }
+
+  /**
+   * Restore known repositories into the current workspace model.
+   */
+  private restoreKnownReposForWorkspace() {
     this.removeReposNotInWorkspace();
     if (this.updateReposWorkspaceFolderIndex()) {
       this.extensionState.saveRepos(this.repos);
     }
-    if (!(await this.checkReposExist())) {
-      // On startup, ensure that sendRepo is called (even if no changes were made)
-      this.sendRepos();
-    }
+  }
+
+  /**
+   * Validate that known repositories still exist.
+   * @returns TRUE => At least one repository changed, FALSE => No repositories changed.
+   */
+  private ensureKnownReposStillExist() {
+    return this.checkReposExist();
+  }
+
+  /**
+   * Refresh configuration for known repositories during startup.
+   */
+  private refreshKnownRepoConfigAtStartup() {
     this.checkReposForNewConfig();
-    await this.checkReposForNewSubmodules();
-    await this.searchWorkspaceForRepos();
+  }
+
+  /**
+   * Refresh submodule discovery for known repositories during startup.
+   */
+  private refreshKnownSubmodulesAtStartup() {
+    return this.checkReposForNewSubmodules();
+  }
+
+  /**
+   * Explicitly discover repositories in the workspace.
+   * @returns TRUE => At least one repository was added, FALSE => No repositories were added.
+   */
+  public async discoverWorkspaceRepos() {
+    return this.searchWorkspaceForRepos();
+  }
+
+  /**
+   * Refresh the current set of known repositories without scanning the workspace for new repositories.
+   */
+  public async refreshKnownRepos() {
+    await this.ensureKnownReposStillExist();
+    await this.refreshKnownSubmodulesAtStartup();
+  }
+
+  /**
+   * Discover repositories in the workspace during startup.
+   */
+  private discoverWorkspaceReposAtStartup() {
+    if (!this.shouldDiscoverWorkspaceReposAtStartup()) {
+      this.logger.log(
+        "Skipped searching workspace for new repos during startup",
+      );
+      return Promise.resolve(false);
+    }
+
+    return this.discoverWorkspaceRepos();
+  }
+
+  /**
+   * Determine if workspace discovery should run during startup.
+   */
+  private shouldDiscoverWorkspaceReposAtStartup() {
+    return !this.lazyStartupRepoDiscovery || !this.hasKnownRepos();
+  }
+
+  /**
+   * Determine if any repositories are currently known.
+   */
+  private hasKnownRepos() {
+    return Object.keys(this.repos).length > 0;
+  }
+
+  /**
+   * Determine if workspace folder watchers should start during startup.
+   */
+  private shouldStartWorkspaceFolderWatchers() {
+    return !this.lazyStartupRepoDiscovery || !this.hasKnownRepos();
+  }
+
+  /**
+   * Start workspace folder watchers during startup.
+   */
+  private startWorkspaceFolderWatchersAtStartup() {
     this.startWatchingFolders();
   }
 

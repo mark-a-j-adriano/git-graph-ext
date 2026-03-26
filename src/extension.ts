@@ -116,7 +116,7 @@ export async function activate(context: vscode.ExtensionContext) {
               ")";
             showInformationMessage(msg);
             logger.log(msg);
-            repoManager.searchWorkspaceForRepos();
+            repoManager.refreshKnownRepos();
           },
           () => {
             const msg =

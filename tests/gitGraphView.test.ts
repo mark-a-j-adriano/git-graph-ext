@@ -4177,12 +4177,12 @@ describe("GitGraphView", () => {
     describe("rescanForRepos", () => {
       it("Should rescan the workspace for repositories (repositories added)", async () => {
         // Setup
-        const spyOnSearchWorkspaceForRepos = jest.spyOn(
+        const spyOnDiscoverWorkspaceRepos = jest.spyOn(
           repoManager,
-          "searchWorkspaceForRepos",
+          "discoverWorkspaceRepos",
         );
         const spyOnShowErrorMessage = jest.spyOn(utils, "showErrorMessage");
-        spyOnSearchWorkspaceForRepos.mockResolvedValueOnce(true);
+        spyOnDiscoverWorkspaceRepos.mockResolvedValueOnce(true);
 
         // Run
         onDidReceiveMessage({
@@ -4191,7 +4191,7 @@ describe("GitGraphView", () => {
 
         // Assert
         await waitForExpect(() => {
-          expect(spyOnSearchWorkspaceForRepos).toHaveBeenCalledWith();
+          expect(spyOnDiscoverWorkspaceRepos).toHaveBeenCalledWith();
           expect(spyOnShowErrorMessage).not.toHaveBeenCalled();
           expect(messages).toHaveLength(0);
         });
@@ -4199,12 +4199,12 @@ describe("GitGraphView", () => {
 
       it("Should rescan the workspace for repositories (no new repositories were found)", async () => {
         // Setup
-        const spyOnSearchWorkspaceForRepos = jest.spyOn(
+        const spyOnDiscoverWorkspaceRepos = jest.spyOn(
           repoManager,
-          "searchWorkspaceForRepos",
+          "discoverWorkspaceRepos",
         );
         const spyOnShowErrorMessage = jest.spyOn(utils, "showErrorMessage");
-        spyOnSearchWorkspaceForRepos.mockResolvedValueOnce(false);
+        spyOnDiscoverWorkspaceRepos.mockResolvedValueOnce(false);
         spyOnShowErrorMessage.mockResolvedValueOnce();
 
         // Run
@@ -4214,7 +4214,7 @@ describe("GitGraphView", () => {
 
         // Assert
         await waitForExpect(() => {
-          expect(spyOnSearchWorkspaceForRepos).toHaveBeenCalledWith();
+          expect(spyOnDiscoverWorkspaceRepos).toHaveBeenCalledWith();
           expect(spyOnShowErrorMessage).toHaveBeenCalledWith(
             "No Git repositories were found in the current workspace.",
           );

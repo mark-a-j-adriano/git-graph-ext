@@ -967,7 +967,7 @@ export class GitGraphView extends Disposable {
         });
         break;
       case "rescanForRepos":
-        if (!(await this.repoManager.searchWorkspaceForRepos())) {
+        if (!(await this.repoManager.discoverWorkspaceRepos())) {
           showErrorMessage(
             "No Git repositories were found in the current workspace.",
           );
