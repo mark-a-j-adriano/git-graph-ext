@@ -98,7 +98,7 @@ Checklist:
 
 ### Batch 4
 
-Status: In progress.
+Status: Finished.
 
 Scope:
 
@@ -111,10 +111,19 @@ Checklist:
 - [x] Restart Batch 4 from the 1.30.9 baseline.
 - [x] Re-implement backup creation using the existing checkout request flow.
 - [x] Validate the backup flow with a focused unit test and compile the extension.
+- [x] Package a unique VSIX for testing.
+
+Test output:
+
+- Current packaged build: `git-graph-1.30.12.vsix`
+- Front-end compile is green.
+- Back-end compile is green.
+- Focused config and utils tests are green.
+- Full lint-gated packaging flow still needs follow-up because existing repository-wide lint warnings fail `vsce package` prepublish.
 
 ### Batch 5
 
-Status: Planned.
+Status: In progress.
 
 Scope:
 
@@ -126,13 +135,19 @@ Scope:
 
 Checklist:
 
-- [ ] Add a collapsible side bar panel for local exclude entries.
-- [ ] Read and parse `.git/info/exclude` into editable list items.
+- [x] Add a collapsible side bar panel for local exclude entries.
+- [x] Read and parse `.git/info/exclude` into editable list items.
 - [ ] Add checkbox state for enable and disable behavior.
-- [ ] Add File Explorer context menu contribution for files and folders.
-- [ ] Append selected file or folder paths to `.git/info/exclude`.
-- [ ] Refresh the exclude panel after updates.
+- [x] Add File Explorer context menu contribution for files and folders.
+- [x] Append selected file or folder paths to `.git/info/exclude`.
+- [x] Refresh the exclude panel after updates.
 - [ ] Package a unique VSIX for testing.
+
+Test output:
+
+- Back-end compile is green.
+- Focused `localExcludeListView` tests are green.
+- Native tree-view checkboxes are still pending because the extension currently targets VS Code `^1.38.0`, which does not provide the checkbox API used by newer tree views.
 
 ### Batch 6
 

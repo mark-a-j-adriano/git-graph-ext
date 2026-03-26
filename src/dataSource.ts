@@ -999,6 +999,25 @@ export class DataSource extends Disposable {
       .catch(() => null); // null => path is not in a repo
   }
 
+  /**
+   * Get the path of the local exclude file for a repository.
+   * @param repo The path of the repository.
+   * @returns The absolute path of the exclude file, or NULL if it couldn't be resolved.
+   */
+  public getExcludeFilePath(repo: string) {
+    return this.spawnGit(
+      ["rev-parse", "--git-path", "info/exclude"],
+      repo,
+      (stdout) => {
+        const excludePath = stdout.trim();
+        const resolvedPath = path.isAbsolute(excludePath)
+          ? excludePath
+          : path.join(repo, excludePath);
+        return getPathFromUri(vscode.Uri.file(path.normalize(resolvedPath)));
+      },
+    ).catch(() => null);
+  }
+
   /* Git Action Methods - Remotes */
 
   /**

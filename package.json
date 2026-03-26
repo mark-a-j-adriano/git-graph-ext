@@ -1,7 +1,7 @@
 {
   "name": "git-graph",
   "displayName": "Git Graph",
-  "version": "1.30.12",
+  "version": "1.30.13",
   "publisher": "mhutchie",
   "author": {
     "name": "Michael Hutchison",
@@ -30,7 +30,7 @@
   "license": "SEE LICENSE IN 'LICENSE'",
   "icon": "resources/icon.png",
   "engines": {
-    "vscode": "^1.38.0"
+    "vscode": "^1.95.0"
   },
   "extensionKind": [
     "workspace"
@@ -96,8 +96,31 @@
         "title": "Open File",
         "icon": "$(go-to-file)",
         "enablement": "isInDiffEditor && resourceScheme == git-graph && git-graph:codiconsSupported"
+      },
+      {
+        "category": "Git Graph",
+        "command": "git-graph.addToLocalExcludeList",
+        "title": "Add to Local Exclude List"
+      },
+      {
+        "category": "Git Graph",
+        "command": "git-graph.refreshLocalExcludeList",
+        "title": "Refresh Local Exclude List"
+      },
+      {
+        "category": "Git Graph",
+        "command": "git-graph.toggleLocalExcludeEntry",
+        "title": "Toggle Local Exclude Entry"
       }
     ],
+    "views": {
+      "scm": [
+        {
+          "id": "git-graph.localExcludeList",
+          "name": "Local Exclude List"
+        }
+      ]
+    },
     "configuration": {
       "type": "object",
       "title": "Git Graph",
@@ -1508,6 +1531,32 @@
           "command": "git-graph.view",
           "group": "inline"
         }
+      ],
+      "explorer/context": [
+        {
+          "command": "git-graph.addToLocalExcludeList",
+          "when": "resourceScheme == file",
+          "group": "2_git-graph"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "git-graph.refreshLocalExcludeList",
+          "when": "view == git-graph.localExcludeList",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "git-graph.toggleLocalExcludeEntry",
+          "when": "view == git-graph.localExcludeList && viewItem == git-graph.localExcludeEntry.enabled",
+          "group": "inline"
+        },
+        {
+          "command": "git-graph.toggleLocalExcludeEntry",
+          "when": "view == git-graph.localExcludeList && viewItem == git-graph.localExcludeEntry.disabled",
+          "group": "inline"
+        }
       ]
     }
   },
@@ -1533,7 +1582,7 @@
     "@types/jest": "26.0.19",
     "@types/node": "8.10.62",
     "@types/prettier": "2.6.0",
-    "@types/vscode": "1.38.0",
+    "@types/vscode": "1.95.0",
     "@typescript-eslint/eslint-plugin": "4.10.0",
     "@typescript-eslint/parser": "4.10.0",
     "eslint": "7.15.0",
